@@ -2,7 +2,7 @@ package main
 
 import (
 	"log"
-	"net"
+	"net/http"
 	"os"
 
 	"carapp.com/m/internal/NHTSA/nhtsa_service"
@@ -14,14 +14,12 @@ import (
 	"carapp.com/m/internal/transaksi"
 	pb "carapp.com/m/proto"
 
+	"github.com/improbable-eng/grpc-web/go/grpcweb"
 	"github.com/joho/godotenv"
+	"github.com/rs/cors"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	// Import package baru untuk interceptor
 )
-
-// PERTAMA, install dependency baru:
-// go get github.com/grpc-ecosystem/go-grpc-middleware
 
 func main() {
 	// 1. Load .env file
@@ -33,47 +31,69 @@ func main() {
 	dbConn := db.ConnectDB()
 	defer dbConn.Close()
 
-	// 3. Setup Server gRPC
+	// 3. Buat server gRPC dengan UnaryInterceptor dan StreamInterceptor
+	grpcServer := grpc.NewServer(
+		grpc.UnaryInterceptor(auth.AuthInterceptor),
+		grpc.StreamInterceptor(auth.StreamAuthInterceptor),
+	)
+
+	// 4. Register Services
+	authServer := auth.NewAuthService(dbConn)
+	pb.RegisterAuthServiceServer(grpcServer, authServer)
+
+	mobilServer := mobil.NewMobilService(dbConn)
+	pb.RegisterMobilServiceServer(grpcServer, mobilServer)
+
+	nhtsaServer := nhtsa_service.NewNhtsaDataService(dbConn)
+	pb.RegisterNhtsaDataServiceServer(grpcServer, nhtsaServer)
+
+	transaksiServer := transaksi.NewTransaksiService(dbConn)
+	pb.RegisterTransaksiServiceServer(grpcServer, transaksiServer)
+
+	notifikasiServer := notifikasi.NewNotifikasiService(dbConn)
+	pb.RegisterNotifikasiServiceServer(grpcServer, notifikasiServer)
+
+	dashboardServer := dashboard.NewDashboardService(dbConn)
+	pb.RegisterDashboardServiceServer(grpcServer, dashboardServer)
+
+	reflection.Register(grpcServer)
+
+	// 5. Buat wrapper gRPC-Web
+	wrappedGrpc := grpcweb.WrapServer(grpcServer,
+		grpcweb.WithOriginFunc(func(origin string) bool { return true }),
+	)
+
+	// 6. Buat Handler HTTP dengan CORS
+	corsHandler := cors.New(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000", "http://localhost:3001", "http://10.0.7.129:3000", "http://127.0.0.1:3000"},
+		AllowedMethods:   []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"},
+		AllowedHeaders:   []string{"Content-Type", "X-Grpc-Web", "X-User-Agent", "Authorization", "authorization"},
+		ExposedHeaders:   []string{"Grpc-Status", "Grpc-Message", "Grpc-Status-Details-Bin"},
+		AllowCredentials: true,
+		Debug:            true,
+	}).Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("Received request: %s %s from %s", r.Method, r.URL.Path, r.RemoteAddr)
+		if wrappedGrpc.IsAcceptableGrpcCorsRequest(r) || wrappedGrpc.IsGrpcWebRequest(r) {
+			wrappedGrpc.ServeHTTP(w, r)
+			return
+		}
+		log.Printf("Not a gRPC-Web request: %s %s", r.Method, r.URL.Path)
+		http.NotFound(w, r)
+	}))
+
+	// 7. Jalankan Server HTTP
 	grpcPort := os.Getenv("GRPC_SERVER_ADDRESS")
 	if grpcPort == "" {
 		grpcPort = "0.0.0.0:9090"
 	}
 
-	lis, err := net.Listen("tcp", grpcPort)
-	if err != nil {
-		log.Fatalf("Gagal listen: %v", err)
+	httpServer := &http.Server{
+		Addr:    grpcPort,
+		Handler: corsHandler,
 	}
 
-	// Terapkan Unary Interceptor (Middleware)
-	s := grpc.NewServer(
-		grpc.UnaryInterceptor(auth.AuthInterceptor),
-	)
-
-	// 4. Register Services
-	// 4. Register Services
-	authServer := auth.NewAuthService(dbConn)
-	pb.RegisterAuthServiceServer(s, authServer)
-
-	mobilServer := mobil.NewMobilService(dbConn)
-	pb.RegisterMobilServiceServer(s, mobilServer)
-
-	nhtsaServer := nhtsa_service.NewNhtsaDataService(dbConn)
-	pb.RegisterNhtsaDataServiceServer(s, nhtsaServer)
-
-	transaksiServer := transaksi.NewTransaksiService(dbConn)
-	pb.RegisterTransaksiServiceServer(s, transaksiServer)
-
-	// --- DAFTARKAN SERVICE BARU KITA ---
-	notifikasiServer := notifikasi.NewNotifikasiService(dbConn)
-	pb.RegisterNotifikasiServiceServer(s, notifikasiServer)
-	// ------------------------------------
-	dashboardServer := dashboard.NewDashboardService(dbConn)
-	pb.RegisterDashboardServiceServer(s, dashboardServer)
-
-	reflection.Register(s)
-
-	log.Printf("Server gRPC berjalan di %s...", lis.Addr())
-	if err := s.Serve(lis); err != nil {
-		log.Fatalf("Gagal menjalankan server: %v", err)
+	log.Printf("Server gRPC-Web (HTTP) berjalan di %s...", grpcPort)
+	if err := httpServer.ListenAndServe(); err != nil {
+		log.Fatalf("Gagal menjalankan server HTTP: %v", err)
 	}
 }
