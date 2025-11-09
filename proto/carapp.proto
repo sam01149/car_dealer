@@ -1,0 +1,222 @@
+syntax = "proto3";
+
+package carapp;
+
+option go_package = "carapp.com/m/proto"; // Sesuaikan dengan nama modul Anda
+
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/empty.proto";
+
+// ==================
+// Definisi Pesan (Message) Utama
+// ==================
+
+message User {
+    string id = 1;
+    string name = 2;
+    string email = 3;
+    string phone = 4;
+    string role = 5;
+    google.protobuf.Timestamp created_at = 6;
+}
+
+message Mobil {
+    string id = 1;
+    string owner_id = 2;
+    string merk = 3;
+    string model = 4;
+    int32 tahun = 5;
+    string kondisi = 6;
+    string deskripsi = 7;
+    double harga_jual = 8;
+    double harga_rental_per_hari = 9;
+    string lokasi = 10;
+    string status = 11;
+    google.protobuf.Timestamp created_at = 12;
+}
+
+message Notifikasi {
+    string id = 1;
+    string user_id = 2;
+    string tipe = 3;
+    string pesan = 4;
+    string priority = 5;
+    google.protobuf.Timestamp read_at = 6;
+    google.protobuf.Timestamp created_at = 7;
+}
+
+// ==================
+// Service 1: AuthService
+// ==================
+
+service AuthService {
+    rpc Register(RegisterRequest) returns (AuthResponse);
+    rpc Login(LoginRequest) returns (AuthResponse);
+}
+
+message RegisterRequest {
+    string name = 1;
+    string email = 2;
+    string password = 3;
+    string phone = 4;
+}
+
+message LoginRequest {
+    string email = 1;
+    string password = 2;
+}
+
+message AuthResponse {
+    User user = 1;
+    string token = 2;
+}
+
+// ==================
+// Service 2: MobilService
+// ==================
+
+service MobilService {
+    // Fitur 4: Jual Mobil
+    rpc CreateMobil(CreateMobilRequest) returns (Mobil);
+    // Fitur 2: List Mobil (dari DB kita)
+    rpc ListMobil(ListMobilRequest) returns (ListMobilResponse);
+    // Fitur 3: Detail Mobil
+    rpc GetMobil(GetMobilRequest) returns (Mobil);
+}
+
+// --- Pesan untuk MobilService ---
+
+message CreateMobilRequest {
+    // owner_id diambil dari JWT Token
+    string merk = 1;
+    string model = 2;
+    int32 tahun = 3;
+    string kondisi = 4;
+    string deskripsi = 5;
+    double harga_jual = 6;
+    double harga_rental_per_hari = 7;
+    string lokasi = 8;
+}
+
+message ListMobilRequest {
+    int32 page = 1;
+    int32 limit = 2;
+    optional string filter_status = 3; // "tersedia", "terjual", dll.
+}
+
+message ListMobilResponse {
+    repeated Mobil mobils = 1;
+    int32 total = 2;
+}
+
+message GetMobilRequest {
+    string mobil_id = 1;
+}
+
+// Pesan untuk NHTSA Cache
+message Make {
+    string brand_id = 1;
+    string name = 2;
+}
+message Model {
+    string model_id = 1;
+    string brand_id = 2;
+    string name = 3;
+}
+message GetMakesRequest {
+    // Kosong, mungkin ada filter nanti
+}
+message GetMakesResponse {
+    repeated Make makes = 1;
+}
+message GetModelsForMakeRequest {
+    string brand_id = 1;
+}
+message GetModelsForMakeResponse {
+    repeated Model models = 1;
+}
+
+service NhtsaDataService {
+    // Prasyarat Fitur 4: Mendapat data dari NHTSA API (Cache)
+    rpc GetMakes(GetMakesRequest) returns (GetMakesResponse);
+    rpc GetModelsForMake(GetModelsForMakeRequest) returns (GetModelsForMakeResponse);
+}
+
+// ==================
+// Service 3: TransaksiService
+// ==================
+
+service TransaksiService {
+    // Fitur 3: Beli Mobil
+    rpc BuyMobil(BuyMobilRequest) returns (TransaksiJualResponse);
+    // Fitur 3 & 5: Rental Mobil
+    rpc RentMobil(RentMobilRequest) returns (TransaksiRentalResponse);
+    rpc CompleteRental(CompleteRentalRequest) returns (TransaksiRentalResponse);
+}
+
+// --- Pesan untuk TransaksiService ---
+
+message BuyMobilRequest {
+    string mobil_id = 1;
+    // pembeli_id diambil dari JWT
+}
+message TransaksiJualResponse {
+    string id = 1;
+    string mobil_id = 2;
+    string penjual_id = 3;
+    string pembeli_id = 4;
+    double total = 5;
+    string status = 6;
+}
+
+message RentMobilRequest {
+    string mobil_id = 1;
+    string tanggal_mulai = 2; // Format: "YYYY-MM-DD"
+    string tanggal_selesai = 3; // Format: "YYYY-MM-DD"
+    // penyewa_id diambil dari JWT
+}
+message CompleteRentalRequest {
+    string rental_id = 1;
+}
+message TransaksiRentalResponse {
+    string id = 1;
+    string mobil_id = 2;
+    string pemilik_id = 3;
+    string penyewa_id = 4;
+    string tanggal_mulai = 5;
+    string tanggal_selesai = 6;
+    double total = 7;
+    string status = 8;
+    double denda = 9;
+}
+
+
+// ==================
+// Service 4: NotifikasiService
+// ==================
+
+service NotifikasiService {
+    // Fitur 6: Notifikasi
+    rpc GetNotifications(GetNotificationsRequest) returns (stream Notifikasi);
+}
+
+message GetNotificationsRequest {
+    // user_id diambil dari JWT
+}
+
+
+// ==================
+// Service 5: DashboardService
+// ==================
+
+service DashboardService {
+    // Fitur Rencana: Dashboard
+    rpc GetDashboard(google.protobuf.Empty) returns (DashboardSummary);
+}
+
+message DashboardSummary {
+    int32 total_mobil_anda = 1;
+    int32 transaksi_aktif = 2;
+    double pendapatan_terakhir = 3;
+    int32 notifikasi_baru = 4;
+}
