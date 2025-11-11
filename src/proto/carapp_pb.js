@@ -866,16 +866,18 @@ proto.carapp.Mobil.toObject = function(includeInstance, msg) {
   var f, obj = {
 id: jspb.Message.getFieldWithDefault(msg, 1, ""),
 ownerId: jspb.Message.getFieldWithDefault(msg, 2, ""),
+ownerName: jspb.Message.getFieldWithDefault(msg, 13, ""),
 merk: jspb.Message.getFieldWithDefault(msg, 3, ""),
 model: jspb.Message.getFieldWithDefault(msg, 4, ""),
 tahun: jspb.Message.getFieldWithDefault(msg, 5, 0),
 kondisi: jspb.Message.getFieldWithDefault(msg, 6, ""),
 deskripsi: jspb.Message.getFieldWithDefault(msg, 7, ""),
 hargaJual: jspb.Message.getFloatingPointFieldWithDefault(msg, 8, 0.0),
-hargaRentalPerHari: jspb.Message.getFloatingPointFieldWithDefault(msg, 9, 0.0),
+fotoUrl: jspb.Message.getFieldWithDefault(msg, 9, ""),
 lokasi: jspb.Message.getFieldWithDefault(msg, 10, ""),
 status: jspb.Message.getFieldWithDefault(msg, 11, ""),
-createdAt: (f = msg.getCreatedAt()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f)
+createdAt: (f = msg.getCreatedAt()) && google_protobuf_timestamp_pb.Timestamp.toObject(includeInstance, f),
+hargaRentalPerHari: jspb.Message.getFloatingPointFieldWithDefault(msg, 14, 0.0)
   };
 
   if (includeInstance) {
@@ -920,6 +922,10 @@ proto.carapp.Mobil.deserializeBinaryFromReader = function(msg, reader) {
       var value = /** @type {string} */ (reader.readString());
       msg.setOwnerId(value);
       break;
+    case 13:
+      var value = /** @type {string} */ (reader.readString());
+      msg.setOwnerName(value);
+      break;
     case 3:
       var value = /** @type {string} */ (reader.readString());
       msg.setMerk(value);
@@ -945,8 +951,8 @@ proto.carapp.Mobil.deserializeBinaryFromReader = function(msg, reader) {
       msg.setHargaJual(value);
       break;
     case 9:
-      var value = /** @type {number} */ (reader.readDouble());
-      msg.setHargaRentalPerHari(value);
+      var value = /** @type {string} */ (reader.readString());
+      msg.setFotoUrl(value);
       break;
     case 10:
       var value = /** @type {string} */ (reader.readString());
@@ -960,6 +966,10 @@ proto.carapp.Mobil.deserializeBinaryFromReader = function(msg, reader) {
       var value = new google_protobuf_timestamp_pb.Timestamp;
       reader.readMessage(value,google_protobuf_timestamp_pb.Timestamp.deserializeBinaryFromReader);
       msg.setCreatedAt(value);
+      break;
+    case 14:
+      var value = /** @type {number} */ (reader.readDouble());
+      msg.setHargaRentalPerHari(value);
       break;
     default:
       reader.skipField();
@@ -1001,6 +1011,13 @@ proto.carapp.Mobil.serializeBinaryToWriter = function(message, writer) {
   if (f.length > 0) {
     writer.writeString(
       2,
+      f
+    );
+  }
+  f = message.getOwnerName();
+  if (f.length > 0) {
+    writer.writeString(
+      13,
       f
     );
   }
@@ -1046,9 +1063,9 @@ proto.carapp.Mobil.serializeBinaryToWriter = function(message, writer) {
       f
     );
   }
-  f = message.getHargaRentalPerHari();
-  if (f !== 0.0) {
-    writer.writeDouble(
+  f = message.getFotoUrl();
+  if (f.length > 0) {
+    writer.writeString(
       9,
       f
     );
@@ -1073,6 +1090,13 @@ proto.carapp.Mobil.serializeBinaryToWriter = function(message, writer) {
       12,
       f,
       google_protobuf_timestamp_pb.Timestamp.serializeBinaryToWriter
+    );
+  }
+  f = message.getHargaRentalPerHari();
+  if (f !== 0.0) {
+    writer.writeDouble(
+      14,
+      f
     );
   }
 };
@@ -1111,6 +1135,24 @@ proto.carapp.Mobil.prototype.getOwnerId = function() {
  */
 proto.carapp.Mobil.prototype.setOwnerId = function(value) {
   return jspb.Message.setProto3StringField(this, 2, value);
+};
+
+
+/**
+ * optional string owner_name = 13;
+ * @return {string}
+ */
+proto.carapp.Mobil.prototype.getOwnerName = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 13, ""));
+};
+
+
+/**
+ * @param {string} value
+ * @return {!proto.carapp.Mobil} returns this
+ */
+proto.carapp.Mobil.prototype.setOwnerName = function(value) {
+  return jspb.Message.setProto3StringField(this, 13, value);
 };
 
 
@@ -1223,20 +1265,20 @@ proto.carapp.Mobil.prototype.setHargaJual = function(value) {
 
 
 /**
- * optional double harga_rental_per_hari = 9;
- * @return {number}
+ * optional string foto_url = 9;
+ * @return {string}
  */
-proto.carapp.Mobil.prototype.getHargaRentalPerHari = function() {
-  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 9, 0.0));
+proto.carapp.Mobil.prototype.getFotoUrl = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 9, ""));
 };
 
 
 /**
- * @param {number} value
+ * @param {string} value
  * @return {!proto.carapp.Mobil} returns this
  */
-proto.carapp.Mobil.prototype.setHargaRentalPerHari = function(value) {
-  return jspb.Message.setProto3FloatField(this, 9, value);
+proto.carapp.Mobil.prototype.setFotoUrl = function(value) {
+  return jspb.Message.setProto3StringField(this, 9, value);
 };
 
 
@@ -1310,6 +1352,24 @@ proto.carapp.Mobil.prototype.clearCreatedAt = function() {
  */
 proto.carapp.Mobil.prototype.hasCreatedAt = function() {
   return jspb.Message.getField(this, 12) != null;
+};
+
+
+/**
+ * optional double harga_rental_per_hari = 14;
+ * @return {number}
+ */
+proto.carapp.Mobil.prototype.getHargaRentalPerHari = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 14, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.carapp.Mobil} returns this
+ */
+proto.carapp.Mobil.prototype.setHargaRentalPerHari = function(value) {
+  return jspb.Message.setProto3FloatField(this, 14, value);
 };
 
 
@@ -2264,8 +2324,9 @@ tahun: jspb.Message.getFieldWithDefault(msg, 3, 0),
 kondisi: jspb.Message.getFieldWithDefault(msg, 4, ""),
 deskripsi: jspb.Message.getFieldWithDefault(msg, 5, ""),
 hargaJual: jspb.Message.getFloatingPointFieldWithDefault(msg, 6, 0.0),
-hargaRentalPerHari: jspb.Message.getFloatingPointFieldWithDefault(msg, 7, 0.0),
-lokasi: jspb.Message.getFieldWithDefault(msg, 8, "")
+fotoUrl: jspb.Message.getFieldWithDefault(msg, 7, ""),
+lokasi: jspb.Message.getFieldWithDefault(msg, 8, ""),
+hargaRentalPerHari: jspb.Message.getFloatingPointFieldWithDefault(msg, 9, 0.0)
   };
 
   if (includeInstance) {
@@ -2327,12 +2388,16 @@ proto.carapp.CreateMobilRequest.deserializeBinaryFromReader = function(msg, read
       msg.setHargaJual(value);
       break;
     case 7:
-      var value = /** @type {number} */ (reader.readDouble());
-      msg.setHargaRentalPerHari(value);
+      var value = /** @type {string} */ (reader.readString());
+      msg.setFotoUrl(value);
       break;
     case 8:
       var value = /** @type {string} */ (reader.readString());
       msg.setLokasi(value);
+      break;
+    case 9:
+      var value = /** @type {number} */ (reader.readDouble());
+      msg.setHargaRentalPerHari(value);
       break;
     default:
       reader.skipField();
@@ -2405,9 +2470,9 @@ proto.carapp.CreateMobilRequest.serializeBinaryToWriter = function(message, writ
       f
     );
   }
-  f = message.getHargaRentalPerHari();
-  if (f !== 0.0) {
-    writer.writeDouble(
+  f = message.getFotoUrl();
+  if (f.length > 0) {
+    writer.writeString(
       7,
       f
     );
@@ -2416,6 +2481,13 @@ proto.carapp.CreateMobilRequest.serializeBinaryToWriter = function(message, writ
   if (f.length > 0) {
     writer.writeString(
       8,
+      f
+    );
+  }
+  f = message.getHargaRentalPerHari();
+  if (f !== 0.0) {
+    writer.writeDouble(
+      9,
       f
     );
   }
@@ -2531,20 +2603,20 @@ proto.carapp.CreateMobilRequest.prototype.setHargaJual = function(value) {
 
 
 /**
- * optional double harga_rental_per_hari = 7;
- * @return {number}
+ * optional string foto_url = 7;
+ * @return {string}
  */
-proto.carapp.CreateMobilRequest.prototype.getHargaRentalPerHari = function() {
-  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 7, 0.0));
+proto.carapp.CreateMobilRequest.prototype.getFotoUrl = function() {
+  return /** @type {string} */ (jspb.Message.getFieldWithDefault(this, 7, ""));
 };
 
 
 /**
- * @param {number} value
+ * @param {string} value
  * @return {!proto.carapp.CreateMobilRequest} returns this
  */
-proto.carapp.CreateMobilRequest.prototype.setHargaRentalPerHari = function(value) {
-  return jspb.Message.setProto3FloatField(this, 7, value);
+proto.carapp.CreateMobilRequest.prototype.setFotoUrl = function(value) {
+  return jspb.Message.setProto3StringField(this, 7, value);
 };
 
 
@@ -2563,6 +2635,24 @@ proto.carapp.CreateMobilRequest.prototype.getLokasi = function() {
  */
 proto.carapp.CreateMobilRequest.prototype.setLokasi = function(value) {
   return jspb.Message.setProto3StringField(this, 8, value);
+};
+
+
+/**
+ * optional double harga_rental_per_hari = 9;
+ * @return {number}
+ */
+proto.carapp.CreateMobilRequest.prototype.getHargaRentalPerHari = function() {
+  return /** @type {number} */ (jspb.Message.getFloatingPointFieldWithDefault(this, 9, 0.0));
+};
+
+
+/**
+ * @param {number} value
+ * @return {!proto.carapp.CreateMobilRequest} returns this
+ */
+proto.carapp.CreateMobilRequest.prototype.setHargaRentalPerHari = function(value) {
+  return jspb.Message.setProto3FloatField(this, 9, value);
 };
 
 

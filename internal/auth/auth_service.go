@@ -42,7 +42,8 @@ func (s *AuthServiceServer) Register(ctx context.Context, req *pb.RegisterReques
 	}
 
 	// 3. Simpan user ke database
-	var userID, userName, userEmail, userPhone, userRole string
+	var userID, userName, userEmail, userRole string
+	var userPhone sql.NullString // Gunakan NullString untuk kolom yang bisa NULL
 	var createdAt time.Time
 
 	// Kita set 'client' sebagai role default
@@ -73,12 +74,18 @@ func (s *AuthServiceServer) Register(ctx context.Context, req *pb.RegisterReques
 	}
 
 	// 5. Kembalikan response
+	// Convert NullString ke string biasa (kosong jika NULL)
+	phoneValue := ""
+	if userPhone.Valid {
+		phoneValue = userPhone.String
+	}
+
 	return &pb.AuthResponse{
 		User: &pb.User{
 			Id:        userID,
 			Name:      userName,
 			Email:     userEmail,
-			Phone:     userPhone,
+			Phone:     phoneValue,
 			Role:      userRole,
 			CreatedAt: timestamppb.New(createdAt),
 		},
@@ -96,7 +103,8 @@ func (s *AuthServiceServer) Login(ctx context.Context, req *pb.LoginRequest) (*p
 	}
 
 	// 2. Cari user di database
-	var userID, userName, userEmail, userPhone, userRole, hashedPassword string
+	var userID, userName, userEmail, userRole, hashedPassword string
+	var userPhone sql.NullString // Gunakan NullString untuk kolom yang bisa NULL
 	var createdAt time.Time
 
 	query := `SELECT id, name, email, phone, role, password_hash, created_at FROM users WHERE email = $1`
@@ -127,15 +135,43 @@ func (s *AuthServiceServer) Login(ctx context.Context, req *pb.LoginRequest) (*p
 	}
 
 	// 5. Kembalikan response
+	// Convert NullString ke string biasa (kosong jika NULL)
+	phoneValue := ""
+	if userPhone.Valid {
+		phoneValue = userPhone.String
+	}
+
 	return &pb.AuthResponse{
 		User: &pb.User{
 			Id:        userID,
 			Name:      userName,
 			Email:     userEmail,
-			Phone:     userPhone,
+			Phone:     phoneValue,
 			Role:      userRole,
 			CreatedAt: timestamppb.New(createdAt),
 		},
 		Token: token,
 	}, nil
 }
+
+// PENJELASAN FILE auth_service.go:
+// File ini menangani autentikasi user (Login & Register)
+//
+// Fungsi Register:
+// - Validasi input (nama, email, password harus diisi)
+// - Hash password dengan bcrypt untuk keamanan
+// - Simpan user baru ke database dengan role default "client"
+// - Generate JWT token yang valid 72 jam
+// - Return user info + token ke client
+//
+// Fungsi Login:
+// - Validasi input (email & password harus diisi)
+// - Cari user di database berdasarkan email
+// - Verifikasi password dengan bcrypt.CompareHashAndPassword
+// - Jika valid, generate JWT token
+// - Return user info + token ke client
+//
+// Keamanan:
+// - Password tidak pernah disimpan plain text (selalu di-hash)
+// - Error message generic "Email atau Password salah" untuk prevent email enumeration
+// - Token otomatis expire setelah 72 jam

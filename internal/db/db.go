@@ -26,3 +26,18 @@ func ConnectDB() *sql.DB {
 	log.Println("Berhasil terhubung ke database PostgreSQL!")
 	return db
 }
+
+// PENJELASAN FILE db.go:
+// File ini berfungsi untuk membuat koneksi ke database PostgreSQL
+//
+// Fungsi ConnectDB:
+// - Membaca connection string dari environment variable DB_SOURCE
+// - Format: "postgresql://user:password@host:port/dbname?sslmode=disable"
+// - Membuka koneksi dengan driver "postgres" (github.com/lib/pq)
+// - Melakukan Ping untuk memastikan koneksi berhasil
+// - Return pointer *sql.DB yang siap digunakan oleh service lain
+//
+// Catatan:
+// - DB_SOURCE harus diset di file .env
+// - Koneksi ini dibuat sekali di main.go dan dibagikan ke semua service
+// - sql.DB sudah mengelola connection pooling secara otomatis

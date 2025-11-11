@@ -23,16 +23,18 @@ message User {
 message Mobil {
     string id = 1;
     string owner_id = 2;
+    string owner_name = 13;
     string merk = 3;
     string model = 4;
     int32 tahun = 5;
     string kondisi = 6;
     string deskripsi = 7;
     double harga_jual = 8;
-    double harga_rental_per_hari = 9;
+    string foto_url = 9;
     string lokasi = 10;
     string status = 11;
     google.protobuf.Timestamp created_at = 12;
+    double harga_rental_per_hari = 14;
 }
 
 message Notifikasi {
@@ -94,8 +96,9 @@ message CreateMobilRequest {
     string kondisi = 4;
     string deskripsi = 5;
     double harga_jual = 6;
-    double harga_rental_per_hari = 7;
+    string foto_url = 7;
     string lokasi = 8;
+    double harga_rental_per_hari = 9;
 }
 
 message ListMobilRequest {
@@ -189,7 +192,6 @@ message TransaksiRentalResponse {
     string status = 8;
     double denda = 9;
 }
-
 
 // ==================
 // Service 4: NotifikasiService

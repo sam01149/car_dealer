@@ -93,3 +93,79 @@ func (s *NotifikasiServiceServer) GetNotifications(req *pb.GetNotificationsReque
 
 	return nil
 }
+
+// PENJELASAN FILE notifikasi_service.go:
+// File ini menangani streaming notifikasi ke client (server-side streaming)
+//
+// Fungsi GetNotifications (Server Streaming RPC):
+// - Mengambil user_id dari context (diisi oleh auth middleware)
+// - Query 50 notifikasi terbaru user dari database
+// - Kirim notifikasi satu per satu ke client via stream
+// - Client akan menerima notifikasi secara real-time
+//
+// Flow:
+// 1. Client buka stream connection
+// 2. Server validate token di middleware
+// 3. Server query notifikasi dari DB (ORDER BY created_at DESC LIMIT 50)
+// 4. Loop setiap notifikasi dan kirim via stream.Send()
+// 5. Jika error atau selesai, tutup stream
+//
+// Database:
+// - read_at bisa NULL (notifikasi belum dibaca)
+// - Menggunakan sql.NullTime untuk handle NULL value
+
+// PENJELASAN FILE notifikasi_service.go:
+// File ini menangani streaming notifikasi ke client (server-side streaming)
+//
+// Fungsi GetNotifications (Server Streaming RPC):
+// - Mengambil user_id dari context (diisi oleh auth middleware)
+// - Query 50 notifikasi terbaru user dari database
+// - Kirim notifikasi satu per satu ke client via stream
+// - Client akan menerima notifikasi secara real-time
+//
+// Flow:
+// 1. Client buka stream connection
+// 2. Server validate token di middleware
+// 3. Server query notifikasi dari DB (ORDER BY created_at DESC LIMIT 50)
+// 4. Loop setiap notifikasi dan kirim via stream.Send()
+// 5. Jika error atau selesai, tutup stream
+
+// PENJELASAN FILE notifikasi_service.go:
+// File ini menangani streaming notifikasi ke client (server-side streaming)
+//
+// Fungsi GetNotifications (Server Streaming RPC):
+// - Mengambil user_id dari context (diisi oleh auth middleware)
+// - Query 50 notifikasi terbaru user dari database
+// - Kirim notifikasi satu per satu ke client via stream
+// - Client akan menerima notifikasi secara real-time
+//
+// Flow:
+// 1. Client buka stream connection
+// 2. Server validate token di middleware
+// 3. Server query notifikasi dari DB (ORDER BY created_at DESC LIMIT 50)
+// 4. Loop setiap notifikasi dan kirim via stream.Send()
+// 5. Jika error atau selesai, tutup stream
+//
+// Database:
+// - read_at bisa NULL (notifikasi belum dibaca)
+// - Menggunakan sql.NullTime untuk handle NULL value
+
+// PENJELASAN FILE notifikasi_service.go:
+// File ini menangani streaming notifikasi ke client (server-side streaming)
+//
+// Fungsi GetNotifications (Server Streaming RPC):
+// - Mengambil user_id dari context (diisi oleh auth middleware)
+// - Query 50 notifikasi terbaru user dari database
+// - Kirim notifikasi satu per satu ke client via stream
+// - Client akan menerima notifikasi secara real-time
+//
+// Flow:
+// 1. Client buka stream connection
+// 2. Server validate token di middleware
+// 3. Server query notifikasi dari DB (ORDER BY created_at DESC LIMIT 50)
+// 4. Loop setiap notifikasi dan kirim via stream.Send()
+// 5. Jika error atau selesai, tutup stream
+//
+// Database:
+// - read_at bisa NULL (notifikasi belum dibaca)
+// - Menggunakan sql.NullTime untuk handle NULL value

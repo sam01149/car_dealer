@@ -21,15 +21,9 @@ export default function MobilDetailPage() {
   const [txError, setTxError] = useState('');
   const [txSuccess, setTxSuccess] = useState('');
 
-  // State baru untuk Form Rental
-  const [showRental, setShowRental] = useState(false);
-  const [tglMulai, setTglMulai] = useState('');
-  const [tglSelesai, setTglSelesai] = useState('');
-
   // State untuk Pembayaran
   const [showPayment, setShowPayment] = useState(false);
   const [paymentAmount, setPaymentAmount] = useState('');
-  const [paymentType, setPaymentType] = useState<'buy' | 'rental'>('buy');
   const [totalPrice, setTotalPrice] = useState(0);
   const [kembalian, setKembalian] = useState(0);
 
@@ -76,7 +70,6 @@ export default function MobilDetailPage() {
     if (!mobil || !id) return;
 
     // Tampilkan form pembayaran
-    setPaymentType('buy');
     setTotalPrice(mobil.getHargaJual());
     setShowPayment(true);
     setPaymentAmount('');
@@ -138,90 +131,6 @@ export default function MobilDetailPage() {
     }
   };
 
-  // --- HANDLER BARU: Rental Mobil ---
-  const handleRental = async () => {
-    if (!user) {
-      router.push('/login');
-      return;
-    }
-    if (!mobil || !id || !tglMulai || !tglSelesai) {
-      setTxError('Tanggal mulai dan selesai harus diisi.');
-      return;
-    }
-
-    // Tampilkan form pembayaran rental
-    setPaymentType('rental');
-    setShowPayment(true);
-    setPaymentAmount('');
-    setKembalian(0);
-    
-    // Hitung total harga rental berdasarkan hari
-    const days = Math.ceil((new Date(tglSelesai).getTime() - new Date(tglMulai).getTime()) / (1000 * 60 * 60 * 24));
-    const total = days * mobil.getHargaRentalPerHari();
-    setTotalPrice(total);
-  };
-
-  // Handler Proses Pembayaran Rental
-  const handleProcessRentalPayment = async () => {
-    if (!tglMulai || !tglSelesai) {
-      setTxError('Pilih tanggal rental terlebih dahulu!');
-      return;
-    }
-
-    const amount = parseFloat(paymentAmount);
-    
-    if (isNaN(amount) || amount <= 0) {
-      setTxError('Masukkan jumlah pembayaran yang valid!');
-      return;
-    }
-
-    if (amount < totalPrice) {
-      setTxError(`Pembayaran kurang! Anda perlu membayar Rp ${totalPrice.toLocaleString('id-ID')}, tapi hanya membayar Rp ${amount.toLocaleString('id-ID')}`);
-      return;
-    }
-
-    const change = amount - totalPrice;
-    setKembalian(change);
-
-    setTxLoading(true);
-    setTxError('');
-    setTxSuccess('');
-
-    try {
-      const req = new RentMobilRequest();
-      req.setMobilId(id!);
-      req.setTanggalMulai(tglMulai); // Format "YYYY-MM-DD"
-      req.setTanggalSelesai(tglSelesai); // Format "YYYY-MM-DD"
-
-      // Buat metadata dengan token
-      const metadata = addAuthMetadata({});
-
-      const response = await new Promise<any>((resolve, reject) => {
-        transaksiClient.rentMobil(req, metadata, (err, response) => {
-          if (err) {
-            console.error('gRPC Error:', err);
-            reject(err);
-          } else {
-            resolve(response);
-          }
-        });
-      });
-
-      setTxSuccess(`✅ Rental berhasil! (ID Transaksi: ${response.getId()})${change > 0 ? `\n💰 Kembalian Anda: Rp ${change.toLocaleString('id-ID')}` : ''}\n\nAnda akan diarahkan ke dashboard...`);
-      setShowPayment(false);
-      setShowRental(false); // Sembunyikan form rental
-      
-      setTimeout(() => {
-        router.push('/dashboard');
-      }, 4000);
-
-    } catch (err: any) {
-      setTxError(`Gagal rental: ${err.message}`);
-    } finally {
-      setTxLoading(false);
-    }
-  };
-
   if (loading) {
     return <main className="container mx-auto p-8"><h1 className="text-2xl">Loading mobil...</h1></main>;
   }
@@ -245,15 +154,27 @@ export default function MobilDetailPage() {
   console.log('Status:', mobil.getStatus());
   console.log('isAvailable:', isAvailable);
   console.log('Harga Jual:', mobil.getHargaJual());
-  console.log('Harga Rental:', mobil.getHargaRentalPerHari());
   console.log('Show Buy Button:', !isOwner && isAvailable && mobil.getHargaJual() > 0);
-  console.log('Show Rental Button:', !isOwner && isAvailable && mobil.getHargaRentalPerHari() > 0);
   console.log('txSuccess:', txSuccess);
   console.log('================');
 
   return (
     <main className="container mx-auto p-8">
       <div className="bg-white text-black p-8 rounded-lg shadow-lg">
+        {/* Foto Mobil */}
+        {mobil.getFotoUrl() && (
+          <div className="mb-6 rounded-lg overflow-hidden">
+            <img 
+              src={mobil.getFotoUrl()} 
+              alt={`${mobil.getMerk()} ${mobil.getModel()}`}
+              className="w-full h-96 object-cover"
+              onError={(e) => {
+                e.currentTarget.style.display = 'none';
+              }}
+            />
+          </div>
+        )}
+
         {/* ... (Info Detail Mobil, tetap sama) ... */}
         <h1 className="text-5xl font-bold mb-4">
           {mobil.getTahun()} {mobil.getMerk()} {mobil.getModel()}
@@ -267,7 +188,7 @@ export default function MobilDetailPage() {
           <div><strong>Kondisi:</strong> <span className="capitalize">{mobil.getKondisi()}</span></div>
           <div><strong>Lokasi:</strong> {mobil.getLokasi()}</div>
           <div><strong>Status:</strong> <span className="capitalize font-bold">{mobil.getStatus()}</span></div>
-          <div><strong>Penjual:</strong> {isOwner ? "Anda" : `User ${mobil.getOwnerId().substring(0, 8)}...`}</div>
+          <div><strong>Penjual:</strong> {isOwner ? "Anda" : (mobil.getOwnerName() || `User ${mobil.getOwnerId().substring(0, 8)}...`)}</div>
         </div>
         
         <p className="text-gray-700 mb-8">{mobil.getDeskripsi()}</p>
@@ -292,45 +213,6 @@ export default function MobilDetailPage() {
             </button>
           )}
 
-          {/* Tombol Rental */}
-          {!isOwner && isAvailable && mobil.getHargaRentalPerHari() > 0 && (
-            <button
-              onClick={() => setShowRental(!showRental)} // Toggle form
-              disabled={txLoading}
-              className="bg-green-600 text-white px-6 py-3 rounded-lg font-bold text-lg hover:bg-green-700 disabled:bg-gray-400"
-            >
-              Rental Mobil Ini
-            </button>
-          )}
-
-          {/* --- Form Rental (Tersembunyi) --- */}
-          {showRental && !txSuccess && (
-            <div className="flex flex-col gap-3 p-4 border rounded-lg bg-gray-50">
-              <h3 className="text-xl font-bold">Pilih Tanggal Rental</h3>
-              <div className="flex gap-4">
-                <input
-                  type="date"
-                  value={tglMulai}
-                  onChange={(e) => setTglMulai(e.target.value)}
-                  className="p-2 border rounded w-1/2"
-                />
-                <input
-                  type="date"
-                  value={tglSelesai}
-                  onChange={(e) => setTglSelesai(e.target.value)}
-                  className="p-2 border rounded w-1/2"
-                />
-              </div>
-              <button
-                onClick={handleRental}
-                disabled={txLoading}
-                className="bg-green-700 text-white p-2 rounded hover:bg-green-800 disabled:bg-gray-400"
-              >
-                {txLoading ? 'Mengkonfirmasi...' : 'Konfirmasi Rental'}
-              </button>
-            </div>
-          )}
-
           {isOwner && (
             <p className="text-lg italic text-gray-600">Ini adalah mobil Anda.</p>
           )}
@@ -340,9 +222,7 @@ export default function MobilDetailPage() {
         {showPayment && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white p-8 rounded-lg shadow-2xl max-w-md w-full">
-              <h2 className="text-2xl font-bold mb-4">
-                {paymentType === 'buy' ? '💳 Pembayaran Pembelian' : '💳 Pembayaran Rental'}
-              </h2>
+              <h2 className="text-2xl font-bold mb-4">💳 Pembayaran Pembelian</h2>
               
               <div className="mb-4">
                 <p className="text-gray-700 mb-2">
@@ -351,11 +231,6 @@ export default function MobilDetailPage() {
                 <p className="text-3xl font-bold text-blue-600">
                   Rp {totalPrice.toLocaleString('id-ID')}
                 </p>
-                {paymentType === 'rental' && tglMulai && tglSelesai && (
-                  <p className="text-sm text-gray-500 mt-1">
-                    ({Math.ceil((new Date(tglSelesai).getTime() - new Date(tglMulai).getTime()) / (1000 * 60 * 60 * 24))} hari × Rp {mobil.getHargaRentalPerHari().toLocaleString('id-ID')}/hari)
-                  </p>
-                )}
               </div>
 
               <div className="mb-4">
@@ -387,7 +262,7 @@ export default function MobilDetailPage() {
 
               <div className="flex gap-3">
                 <button
-                  onClick={paymentType === 'buy' ? handleProcessPayment : handleProcessRentalPayment}
+                  onClick={handleProcessPayment}
                   disabled={txLoading}
                   className="flex-1 bg-blue-600 text-white py-3 rounded-lg font-bold hover:bg-blue-700 disabled:bg-gray-400"
                 >

@@ -69,8 +69,8 @@ export class Mobil extends jspb.Message {
   getHargaJual(): number;
   setHargaJual(value: number): Mobil;
 
-  getHargaRentalPerHari(): number;
-  setHargaRentalPerHari(value: number): Mobil;
+  getFotoUrl(): string;
+  setFotoUrl(value: string): Mobil;
 
   getLokasi(): string;
   setLokasi(value: string): Mobil;
@@ -82,6 +82,12 @@ export class Mobil extends jspb.Message {
   setCreatedAt(value?: google_protobuf_timestamp_pb.Timestamp): Mobil;
   hasCreatedAt(): boolean;
   clearCreatedAt(): Mobil;
+
+  getOwnerName(): string;
+  setOwnerName(value: string): Mobil;
+
+  getHargaRentalPerHari(): number;
+  setHargaRentalPerHari(value: number): Mobil;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): Mobil.AsObject;
@@ -101,10 +107,12 @@ export namespace Mobil {
     kondisi: string,
     deskripsi: string,
     hargaJual: number,
-    hargaRentalPerHari: number,
+    fotoUrl: string,
     lokasi: string,
     status: string,
     createdAt?: google_protobuf_timestamp_pb.Timestamp.AsObject,
+    ownerName: string,
+    hargaRentalPerHari: number,
   }
 }
 
@@ -249,11 +257,14 @@ export class CreateMobilRequest extends jspb.Message {
   getHargaJual(): number;
   setHargaJual(value: number): CreateMobilRequest;
 
-  getHargaRentalPerHari(): number;
-  setHargaRentalPerHari(value: number): CreateMobilRequest;
+  getFotoUrl(): string;
+  setFotoUrl(value: string): CreateMobilRequest;
 
   getLokasi(): string;
   setLokasi(value: string): CreateMobilRequest;
+
+  getHargaRentalPerHari(): number;
+  setHargaRentalPerHari(value: number): CreateMobilRequest;
 
   serializeBinary(): Uint8Array;
   toObject(includeInstance?: boolean): CreateMobilRequest.AsObject;
@@ -271,8 +282,9 @@ export namespace CreateMobilRequest {
     kondisi: string,
     deskripsi: string,
     hargaJual: number,
-    hargaRentalPerHari: number,
+    fotoUrl: string,
     lokasi: string,
+    hargaRentalPerHari: number,
   }
 }
 

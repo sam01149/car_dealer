@@ -37,8 +37,11 @@ export default function HomePage() {
           merk: m.getMerk(),
           model: m.getModel(),
           status: m.getStatus(),
-          ownerId: m.getOwnerId()
+          ownerId: m.getOwnerId(),
+          fotoUrl: m.getFotoUrl(),
+          hargaRental: m.getHargaRentalPerHari()
         })));
+        console.log('First car foto_url:', response.getMobilsList()[0]?.getFotoUrl());
         console.log('=====================');
         
         setMobils(response.getMobilsList());
@@ -137,9 +140,22 @@ export default function HomePage() {
 
                 {/* Image Placeholder with Gradient */}
                 <div className="h-48 bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center relative overflow-hidden">
-                  <div className="text-6xl opacity-90 group-hover:scale-110 transition-transform">
-                    🚗
-                  </div>
+                  {mobil.getFotoUrl() ? (
+                    <img 
+                      src={mobil.getFotoUrl()} 
+                      alt={`${mobil.getMerk()} ${mobil.getModel()}`}
+                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                      onError={(e) => {
+                        // Fallback jika gambar gagal load
+                        e.currentTarget.style.display = 'none';
+                        e.currentTarget.parentElement!.innerHTML = '<div class="text-6xl opacity-90">🚗</div>';
+                      }}
+                    />
+                  ) : (
+                    <div className="text-6xl opacity-90 group-hover:scale-110 transition-transform">
+                      🚗
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-black opacity-0 group-hover:opacity-10 transition-opacity"></div>
                 </div>
 
@@ -156,11 +172,6 @@ export default function HomePage() {
                     <p className="text-2xl font-bold text-blue-600">
                       Rp {mobil.getHargaJual().toLocaleString('id-ID')}
                     </p>
-                    {mobil.getHargaRentalPerHari() > 0 && (
-                      <p className="text-sm text-green-600 font-semibold mt-1">
-                        📅 Rental: Rp {mobil.getHargaRentalPerHari().toLocaleString('id-ID')}/hari
-                      </p>
-                    )}
                   </div>
 
                   <div className="flex items-center justify-between text-sm text-gray-600 mb-4">

@@ -54,15 +54,10 @@ func (s *DashboardServiceServer) GetDashboard(ctx context.Context, req *emptypb.
 	// Goroutine 2: Hitung transaksi aktif
 	go func() {
 		defer wg.Done()
-		// (Transaksi jual "diproses" ATAU rental "aktif" yang melibatkan user)
+		// Hanya transaksi jual yang "diproses" yang melibatkan user
 		query := `
-			SELECT COUNT(DISTINCT id) FROM (
-				SELECT id FROM transaksi_jual 
-					WHERE (penjual_id = $1 OR pembeli_id = $1) AND status = 'diproses'
-				UNION ALL
-				SELECT id FROM transaksi_rental 
-					WHERE (pemilik_id = $1 OR penyewa_id = $1) AND status = 'aktif'
-			) AS active_transactions
+			SELECT COUNT(*) FROM transaksi_jual 
+			WHERE (penjual_id = $1 OR pembeli_id = $1) AND status = 'diproses'
 		`
 		err := s.DB.QueryRowContext(ctx, query, userID).Scan(&resp.TransaksiAktif)
 		if err != nil {
@@ -107,3 +102,20 @@ func (s *DashboardServiceServer) GetDashboard(ctx context.Context, req *emptypb.
 	// 4. Kembalikan response
 	return &resp, nil
 }
+
+// PENJELASAN FILE dashboard_service.go:
+// File ini menyediakan summary data untuk dashboard user
+//
+// Fungsi GetDashboard:
+// - Mengambil user_id dari context (sudah tervalidasi di middleware)
+// - Jalankan 4 query secara PARALEL menggunakan goroutine & WaitGroup:
+//   1. Total mobil milik user (COUNT dari mobils WHERE owner_id)
+//   2. Transaksi aktif (COUNT transaksi_jual status='diproses')
+//   3. Pendapatan terakhir (SUM total dari transaksi_jual WHERE penjual_id dan status='selesai')
+//   4. Notifikasi baru (COUNT notifikasi WHERE user_id dan read_at IS NULL)
+// - Gunakan errChan untuk capture error dari goroutine
+// - Return DashboardSummary dengan semua data aggregate
+//
+// Keuntungan parallel query:
+// - Lebih cepat daripada query sequential (4 query jadi 1x waktu query terlama)
+// - Efisien untuk dashboard yang butuh banyak data

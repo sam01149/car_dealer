@@ -30,6 +30,7 @@ export default function JualMobilPage() {
   const [hargaJual, setHargaJual] = useState(0);
   const [lokasi, setLokasi] = useState('');
   const [deskripsi, setDeskripsi] = useState('');
+  const [fotoUrl, setFotoUrl] = useState('');
 
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
@@ -134,6 +135,7 @@ export default function JualMobilPage() {
       req.setHargaJual(hargaJual);
       req.setLokasi(lokasi);
       req.setDeskripsi(deskripsi);
+      req.setFotoUrl(fotoUrl);
       // 'harga_rental_per_hari' bisa di-skip (default 0)
 
       // Buat metadata dengan token
@@ -356,15 +358,50 @@ export default function JualMobilPage() {
               {/* Deskripsi */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-2">
-                  Deskripsi
+                  Deskripsi <span className="text-red-500">*</span>
                 </label>
                 <textarea 
-                  placeholder="Ceritakan tentang mobil Anda..." 
+                  placeholder="jelaskan singkat tentang mobil anda dan sertakan plat mobil" 
                   value={deskripsi} 
                   onChange={(e) => setDeskripsi(e.target.value)} 
+                  required
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
                   rows={4} 
                 />
+              </div>
+
+              {/* Foto URL */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  URL Foto Mobil <span className="text-gray-500">(Opsional)</span>
+                </label>
+                <input 
+                  type="url" 
+                  placeholder="https://example.com/foto-mobil.jpg" 
+                  value={fotoUrl} 
+                  onChange={(e) => setFotoUrl(e.target.value)} 
+                  className="w-full p-3 border border-gray-300 rounded-lg bg-white text-gray-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent" 
+                />
+                <p className="mt-2 text-sm text-gray-500">
+                  💡 Masukkan URL foto mobil dari internet (contoh: dari Google Drive, Imgur, atau website lain)
+                </p>
+                
+                {/* Preview foto jika URL valid */}
+                {fotoUrl && (
+                  <div className="mt-4 border border-gray-300 rounded-lg p-4 bg-gray-50">
+                    <p className="text-sm font-semibold text-gray-700 mb-2">Preview Foto:</p>
+                    <img 
+                      src={fotoUrl} 
+                      alt="Preview mobil" 
+                      className="w-full max-h-64 object-cover rounded-lg"
+                      onError={(e) => {
+                        e.currentTarget.src = '';
+                        e.currentTarget.alt = '❌ URL foto tidak valid';
+                        e.currentTarget.className = 'w-full p-4 text-center text-red-500 bg-red-50 rounded-lg';
+                      }}
+                    />
+                  </div>
+                )}
               </div>
               
               <button 

@@ -111,16 +111,18 @@ type Mobil struct {
 	state              protoimpl.MessageState `protogen:"open.v1"`
 	Id                 string                 `protobuf:"bytes,1,opt,name=id,proto3" json:"id,omitempty"`
 	OwnerId            string                 `protobuf:"bytes,2,opt,name=owner_id,json=ownerId,proto3" json:"owner_id,omitempty"`
+	OwnerName          string                 `protobuf:"bytes,13,opt,name=owner_name,json=ownerName,proto3" json:"owner_name,omitempty"`
 	Merk               string                 `protobuf:"bytes,3,opt,name=merk,proto3" json:"merk,omitempty"`
 	Model              string                 `protobuf:"bytes,4,opt,name=model,proto3" json:"model,omitempty"`
 	Tahun              int32                  `protobuf:"varint,5,opt,name=tahun,proto3" json:"tahun,omitempty"`
 	Kondisi            string                 `protobuf:"bytes,6,opt,name=kondisi,proto3" json:"kondisi,omitempty"`
 	Deskripsi          string                 `protobuf:"bytes,7,opt,name=deskripsi,proto3" json:"deskripsi,omitempty"`
 	HargaJual          float64                `protobuf:"fixed64,8,opt,name=harga_jual,json=hargaJual,proto3" json:"harga_jual,omitempty"`
-	HargaRentalPerHari float64                `protobuf:"fixed64,9,opt,name=harga_rental_per_hari,json=hargaRentalPerHari,proto3" json:"harga_rental_per_hari,omitempty"`
+	FotoUrl            string                 `protobuf:"bytes,9,opt,name=foto_url,json=fotoUrl,proto3" json:"foto_url,omitempty"`
 	Lokasi             string                 `protobuf:"bytes,10,opt,name=lokasi,proto3" json:"lokasi,omitempty"`
 	Status             string                 `protobuf:"bytes,11,opt,name=status,proto3" json:"status,omitempty"`
 	CreatedAt          *timestamppb.Timestamp `protobuf:"bytes,12,opt,name=created_at,json=createdAt,proto3" json:"created_at,omitempty"`
+	HargaRentalPerHari float64                `protobuf:"fixed64,14,opt,name=harga_rental_per_hari,json=hargaRentalPerHari,proto3" json:"harga_rental_per_hari,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -169,6 +171,13 @@ func (x *Mobil) GetOwnerId() string {
 	return ""
 }
 
+func (x *Mobil) GetOwnerName() string {
+	if x != nil {
+		return x.OwnerName
+	}
+	return ""
+}
+
 func (x *Mobil) GetMerk() string {
 	if x != nil {
 		return x.Merk
@@ -211,11 +220,11 @@ func (x *Mobil) GetHargaJual() float64 {
 	return 0
 }
 
-func (x *Mobil) GetHargaRentalPerHari() float64 {
+func (x *Mobil) GetFotoUrl() string {
 	if x != nil {
-		return x.HargaRentalPerHari
+		return x.FotoUrl
 	}
-	return 0
+	return ""
 }
 
 func (x *Mobil) GetLokasi() string {
@@ -237,6 +246,13 @@ func (x *Mobil) GetCreatedAt() *timestamppb.Timestamp {
 		return x.CreatedAt
 	}
 	return nil
+}
+
+func (x *Mobil) GetHargaRentalPerHari() float64 {
+	if x != nil {
+		return x.HargaRentalPerHari
+	}
+	return 0
 }
 
 type Notifikasi struct {
@@ -512,8 +528,9 @@ type CreateMobilRequest struct {
 	Kondisi            string  `protobuf:"bytes,4,opt,name=kondisi,proto3" json:"kondisi,omitempty"`
 	Deskripsi          string  `protobuf:"bytes,5,opt,name=deskripsi,proto3" json:"deskripsi,omitempty"`
 	HargaJual          float64 `protobuf:"fixed64,6,opt,name=harga_jual,json=hargaJual,proto3" json:"harga_jual,omitempty"`
-	HargaRentalPerHari float64 `protobuf:"fixed64,7,opt,name=harga_rental_per_hari,json=hargaRentalPerHari,proto3" json:"harga_rental_per_hari,omitempty"`
+	FotoUrl            string  `protobuf:"bytes,7,opt,name=foto_url,json=fotoUrl,proto3" json:"foto_url,omitempty"`
 	Lokasi             string  `protobuf:"bytes,8,opt,name=lokasi,proto3" json:"lokasi,omitempty"`
+	HargaRentalPerHari float64 `protobuf:"fixed64,9,opt,name=harga_rental_per_hari,json=hargaRentalPerHari,proto3" json:"harga_rental_per_hari,omitempty"`
 	unknownFields      protoimpl.UnknownFields
 	sizeCache          protoimpl.SizeCache
 }
@@ -590,11 +607,11 @@ func (x *CreateMobilRequest) GetHargaJual() float64 {
 	return 0
 }
 
-func (x *CreateMobilRequest) GetHargaRentalPerHari() float64 {
+func (x *CreateMobilRequest) GetFotoUrl() string {
 	if x != nil {
-		return x.HargaRentalPerHari
+		return x.FotoUrl
 	}
-	return 0
+	return ""
 }
 
 func (x *CreateMobilRequest) GetLokasi() string {
@@ -602,6 +619,13 @@ func (x *CreateMobilRequest) GetLokasi() string {
 		return x.Lokasi
 	}
 	return ""
+}
+
+func (x *CreateMobilRequest) GetHargaRentalPerHari() float64 {
+	if x != nil {
+		return x.HargaRentalPerHari
+	}
+	return 0
 }
 
 type ListMobilRequest struct {
@@ -1497,23 +1521,26 @@ const file_proto_carapp_proto_rawDesc = "" +
 	"\x05phone\x18\x04 \x01(\tR\x05phone\x12\x12\n" +
 	"\x04role\x18\x05 \x01(\tR\x04role\x129\n" +
 	"\n" +
-	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\xe7\x02\n" +
+	"created_at\x18\x06 \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\xa1\x03\n" +
 	"\x05Mobil\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x19\n" +
-	"\bowner_id\x18\x02 \x01(\tR\aownerId\x12\x12\n" +
+	"\bowner_id\x18\x02 \x01(\tR\aownerId\x12\x1d\n" +
+	"\n" +
+	"owner_name\x18\r \x01(\tR\townerName\x12\x12\n" +
 	"\x04merk\x18\x03 \x01(\tR\x04merk\x12\x14\n" +
 	"\x05model\x18\x04 \x01(\tR\x05model\x12\x14\n" +
 	"\x05tahun\x18\x05 \x01(\x05R\x05tahun\x12\x18\n" +
 	"\akondisi\x18\x06 \x01(\tR\akondisi\x12\x1c\n" +
 	"\tdeskripsi\x18\a \x01(\tR\tdeskripsi\x12\x1d\n" +
 	"\n" +
-	"harga_jual\x18\b \x01(\x01R\thargaJual\x121\n" +
-	"\x15harga_rental_per_hari\x18\t \x01(\x01R\x12hargaRentalPerHari\x12\x16\n" +
+	"harga_jual\x18\b \x01(\x01R\thargaJual\x12\x19\n" +
+	"\bfoto_url\x18\t \x01(\tR\afotoUrl\x12\x16\n" +
 	"\x06lokasi\x18\n" +
 	" \x01(\tR\x06lokasi\x12\x16\n" +
 	"\x06status\x18\v \x01(\tR\x06status\x129\n" +
 	"\n" +
-	"created_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\"\xeb\x01\n" +
+	"created_at\x18\f \x01(\v2\x1a.google.protobuf.TimestampR\tcreatedAt\x121\n" +
+	"\x15harga_rental_per_hari\x18\x0e \x01(\x01R\x12hargaRentalPerHari\"\xeb\x01\n" +
 	"\n" +
 	"Notifikasi\x12\x0e\n" +
 	"\x02id\x18\x01 \x01(\tR\x02id\x12\x17\n" +
@@ -1534,7 +1561,7 @@ const file_proto_carapp_proto_rawDesc = "" +
 	"\bpassword\x18\x02 \x01(\tR\bpassword\"F\n" +
 	"\fAuthResponse\x12 \n" +
 	"\x04user\x18\x01 \x01(\v2\f.carapp.UserR\x04user\x12\x14\n" +
-	"\x05token\x18\x02 \x01(\tR\x05token\"\xf6\x01\n" +
+	"\x05token\x18\x02 \x01(\tR\x05token\"\x91\x02\n" +
 	"\x12CreateMobilRequest\x12\x12\n" +
 	"\x04merk\x18\x01 \x01(\tR\x04merk\x12\x14\n" +
 	"\x05model\x18\x02 \x01(\tR\x05model\x12\x14\n" +
@@ -1542,9 +1569,10 @@ const file_proto_carapp_proto_rawDesc = "" +
 	"\akondisi\x18\x04 \x01(\tR\akondisi\x12\x1c\n" +
 	"\tdeskripsi\x18\x05 \x01(\tR\tdeskripsi\x12\x1d\n" +
 	"\n" +
-	"harga_jual\x18\x06 \x01(\x01R\thargaJual\x121\n" +
-	"\x15harga_rental_per_hari\x18\a \x01(\x01R\x12hargaRentalPerHari\x12\x16\n" +
-	"\x06lokasi\x18\b \x01(\tR\x06lokasi\"x\n" +
+	"harga_jual\x18\x06 \x01(\x01R\thargaJual\x12\x19\n" +
+	"\bfoto_url\x18\a \x01(\tR\afotoUrl\x12\x16\n" +
+	"\x06lokasi\x18\b \x01(\tR\x06lokasi\x121\n" +
+	"\x15harga_rental_per_hari\x18\t \x01(\x01R\x12hargaRentalPerHari\"x\n" +
 	"\x10ListMobilRequest\x12\x12\n" +
 	"\x04page\x18\x01 \x01(\x05R\x04page\x12\x14\n" +
 	"\x05limit\x18\x02 \x01(\x05R\x05limit\x12(\n" +

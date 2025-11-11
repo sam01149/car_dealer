@@ -67,3 +67,34 @@ func ValidateToken(tokenString string) (*JwtCustomClaims, error) {
 
 	return nil, jwt.ErrInvalidKey
 }
+
+// PENJELASAN FILE token.go:
+// File ini menangani pembuatan dan validasi JWT (JSON Web Token) untuk autentikasi
+//
+// Struct JwtCustomClaims:
+// - Menyimpan data user dalam token: UserID, Email, Role
+// - Juga berisi ExpiresAt dan IssuedAt dari jwt.RegisteredClaims
+// - Data ini bisa diakses setelah token divalidasi
+//
+// Fungsi getJwtSecret:
+// - Mengambil secret key dari environment variable JWT_SECRET_KEY
+// - Secret ini digunakan untuk sign dan verify token
+// - Harus dijaga kerahasiaannya (jangan commit ke git!)
+//
+// Fungsi GenerateToken:
+// - Dipanggil setelah login/register berhasil
+// - Membuat JWT token dengan masa berlaku 72 jam
+// - Token berisi user_id, email, role yang ter-encrypt
+// - Return token string untuk dikirim ke client
+//
+// Fungsi ValidateToken:
+// - Dipanggil di middleware untuk setiap request
+// - Parse token dan verifikasi signature dengan secret key
+// - Cek apakah token sudah expired
+// - Return claims (user info) jika valid, error jika tidak
+//
+// Keamanan:
+// - Token di-sign dengan JWT_SECRET_KEY (prevent tampering)
+// - Token expire otomatis setelah 72 jam
+// - Payload bisa di-decode tapi tidak bisa diubah tanpa secret
+// - Jangan simpan data sensitif (password, credit card) di token

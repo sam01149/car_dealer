@@ -5,11 +5,11 @@ import (
 	"net/http"
 	"os"
 
-	"carapp.com/m/internal/NHTSA/nhtsa_service"
 	"carapp.com/m/internal/auth"
 	"carapp.com/m/internal/dashboard"
 	"carapp.com/m/internal/db"
 	"carapp.com/m/internal/mobil"
+	"carapp.com/m/internal/nhtsa/nhtsa_service"
 	"carapp.com/m/internal/notifikasi"
 	"carapp.com/m/internal/transaksi"
 	pb "carapp.com/m/proto"
@@ -65,7 +65,7 @@ func main() {
 
 	// 6. Buat Handler HTTP dengan CORS
 	corsHandler := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000", "http://localhost:3001", "http://10.0.7.129:3000", "http://127.0.0.1:3000"},
+		AllowedOrigins:   []string{"http://localhost:3000", "http://localhost:3001", "http://10.0.7.129:3000", "http://127.0.0.1:3000", "http://172.18.208.1:3000"},
 		AllowedMethods:   []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"},
 		AllowedHeaders:   []string{"Content-Type", "X-Grpc-Web", "X-User-Agent", "Authorization", "authorization"},
 		ExposedHeaders:   []string{"Grpc-Status", "Grpc-Message", "Grpc-Status-Details-Bin"},
@@ -97,3 +97,14 @@ func main() {
 		log.Fatalf("Gagal menjalankan server HTTP: %v", err)
 	}
 }
+
+// PENJELASAN FILE main.go:
+// File ini adalah entry point aplikasi backend Car Dealer gRPC server
+// Fungsi utama:
+// - Load konfigurasi dari .env (DB_SOURCE, JWT_SECRET_KEY, dll)
+// - Buat koneksi ke database PostgreSQL
+// - Setup gRPC server dengan middleware autentikasi (UnaryInterceptor & StreamInterceptor)
+// - Daftarkan semua service: Auth, Mobil, NHTSA, Transaksi, Notifikasi, Dashboard
+// - Wrap gRPC dengan grpc-web agar bisa diakses browser
+// - Setup CORS untuk mengizinkan frontend mengakses API
+// - Jalankan HTTP server di port 9090 (default)

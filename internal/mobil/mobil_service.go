@@ -4,12 +4,15 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"fmt"
 	"log"
+	"math"
 	"strconv"
 	"time"
 
 	"carapp.com/m/internal/auth"
 	"carapp.com/m/internal/nhtsa"
+	"carapp.com/m/internal/notifikasi"
 	pb "carapp.com/m/proto"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
@@ -75,23 +78,25 @@ func (s *MobilServiceServer) CreateMobil(ctx context.Context, req *pb.CreateMobi
 		return nil, status.Errorf(codes.InvalidArgument, "Data mobil tidak valid (Merk, Model, Tahun, Harga Jual)")
 	}
 
+	if req.Deskripsi == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "Deskripsi harus diisi")
+	}
+
+	// Bulatkan harga untuk menghindari floating-point precision issue
+	hargaJualBulat := math.Round(req.HargaJual)
+
 	// 3. Simpan ke database
 	query := `
 		INSERT INTO mobils (
 			owner_id, merk, model, tahun, kondisi, deskripsi, 
-			harga_jual, harga_rental_per_hari, lokasi, status
+			harga_jual, foto_url, lokasi, status
 		) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
 		RETURNING id, owner_id, merk, model, tahun, kondisi, deskripsi, 
-		          harga_jual, harga_rental_per_hari, lokasi, status, created_at
+		          harga_jual, foto_url, lokasi, status, created_at
 	`
 
 	var mobil pb.Mobil
 	var createdAt time.Time
-
-	var hargaRental sql.NullFloat64
-	if req.HargaRentalPerHari > 0 {
-		hargaRental = sql.NullFloat64{Float64: req.HargaRentalPerHari, Valid: true}
-	}
 
 	err := s.DB.QueryRowContext(ctx, query,
 		userID,
@@ -100,8 +105,8 @@ func (s *MobilServiceServer) CreateMobil(ctx context.Context, req *pb.CreateMobi
 		req.Tahun,
 		req.Kondisi,
 		req.Deskripsi,
-		req.HargaJual,
-		hargaRental,
+		hargaJualBulat,
+		req.FotoUrl, // Simpan foto_url dari request
 		req.Lokasi,
 		"tersedia",
 	).Scan(
@@ -113,7 +118,7 @@ func (s *MobilServiceServer) CreateMobil(ctx context.Context, req *pb.CreateMobi
 		&mobil.Kondisi,
 		&mobil.Deskripsi,
 		&mobil.HargaJual,
-		&mobil.HargaRentalPerHari,
+		&mobil.FotoUrl, // Scan langsung ke FotoUrl
 		&mobil.Lokasi,
 		&mobil.Status,
 		&createdAt,
@@ -126,6 +131,13 @@ func (s *MobilServiceServer) CreateMobil(ctx context.Context, req *pb.CreateMobi
 
 	mobil.CreatedAt = timestamppb.New(createdAt)
 	log.Printf("Mobil baru berhasil dibuat oleh UserID %s (MobilID: %s)", userID, mobil.Id)
+
+	// Buat notifikasi untuk penjual
+	pesanMobil := fmt.Sprintf("%d %s %s", mobil.Tahun, mobil.Merk, mobil.Model)
+	go notifikasi.CreateNotification(s.DB, context.Background(), userID, "jual",
+		fmt.Sprintf("Anda berhasil memasang iklan jual mobil %s dengan harga Rp %.0f pada tanggal %s.",
+			pesanMobil, mobil.HargaJual, createdAt.Format("02 Jan 2006")))
+
 	return &mobil, nil
 }
 
@@ -152,7 +164,7 @@ func (s *MobilServiceServer) ListMobil(ctx context.Context, req *pb.ListMobilReq
 	// Query untuk mengambil mobil
 	query := `
 		SELECT id, owner_id, merk, model, tahun, kondisi, deskripsi, 
-		       harga_jual, harga_rental_per_hari, lokasi, status, created_at
+		       harga_jual, foto_url, lokasi, status, created_at
 		FROM mobils
 		WHERE status = $1
 		ORDER BY created_at DESC
@@ -169,12 +181,11 @@ func (s *MobilServiceServer) ListMobil(ctx context.Context, req *pb.ListMobilReq
 	for rows.Next() {
 		var mobil pb.Mobil
 		var createdAt time.Time
-		// Hati-hati dengan nilai NULL untuk harga rental
-		var hargaRental sql.NullFloat64
+		var fotoUrl sql.NullString
 
 		err := rows.Scan(
 			&mobil.Id, &mobil.OwnerId, &mobil.Merk, &mobil.Model, &mobil.Tahun,
-			&mobil.Kondisi, &mobil.Deskripsi, &mobil.HargaJual, &hargaRental,
+			&mobil.Kondisi, &mobil.Deskripsi, &mobil.HargaJual, &fotoUrl,
 			&mobil.Lokasi, &mobil.Status, &createdAt,
 		)
 		if err != nil {
@@ -182,7 +193,10 @@ func (s *MobilServiceServer) ListMobil(ctx context.Context, req *pb.ListMobilReq
 			continue
 		}
 
-		mobil.HargaRentalPerHari = hargaRental.Float64 // Akan jadi 0 jika NULL
+		// Set foto_url jika ada
+		if fotoUrl.Valid {
+			mobil.FotoUrl = fotoUrl.String
+		}
 		mobil.CreatedAt = timestamppb.New(createdAt)
 		mobils = append(mobils, &mobil)
 	}
@@ -206,18 +220,20 @@ func (s *MobilServiceServer) GetMobil(ctx context.Context, req *pb.GetMobilReque
 	}
 
 	query := `
-		SELECT id, owner_id, merk, model, tahun, kondisi, deskripsi, 
-		       harga_jual, harga_rental_per_hari, lokasi, status, created_at
-		FROM mobils
-		WHERE id = $1
+		SELECT m.id, m.owner_id, u.name as owner_name, m.merk, m.model, m.tahun, m.kondisi, m.deskripsi, 
+		       m.harga_jual, m.foto_url, m.lokasi, m.status, m.created_at
+		FROM mobils m
+		LEFT JOIN users u ON m.owner_id = u.id
+		WHERE m.id = $1
 	`
 	var mobil pb.Mobil
 	var createdAt time.Time
-	var hargaRental sql.NullFloat64
+	var fotoUrl sql.NullString
+	var ownerName string
 
 	err := s.DB.QueryRowContext(ctx, query, req.MobilId).Scan(
-		&mobil.Id, &mobil.OwnerId, &mobil.Merk, &mobil.Model, &mobil.Tahun,
-		&mobil.Kondisi, &mobil.Deskripsi, &mobil.HargaJual, &hargaRental,
+		&mobil.Id, &mobil.OwnerId, &ownerName, &mobil.Merk, &mobil.Model, &mobil.Tahun,
+		&mobil.Kondisi, &mobil.Deskripsi, &mobil.HargaJual, &fotoUrl,
 		&mobil.Lokasi, &mobil.Status, &createdAt,
 	)
 
@@ -229,7 +245,14 @@ func (s *MobilServiceServer) GetMobil(ctx context.Context, req *pb.GetMobilReque
 		return nil, status.Errorf(codes.Internal, "Gagal mengambil data mobil")
 	}
 
-	mobil.HargaRentalPerHari = hargaRental.Float64
+	// Set owner name
+	mobil.OwnerName = ownerName
+	log.Printf("Owner name: %s", ownerName)
+
+	// Set foto_url jika ada
+	if fotoUrl.Valid {
+		mobil.FotoUrl = fotoUrl.String
+	}
 	mobil.CreatedAt = timestamppb.New(createdAt)
 
 	return &mobil, nil
@@ -411,3 +434,97 @@ func (s *MobilServiceServer) saveModelsToCache(apiModels []nhtsa.NhtsaModel) {
 
 	log.Printf("Sukses menyimpan %d model ke cache DB", len(apiModels))
 }
+
+// PENJELASAN FILE mobil_service.go:
+// File ini menangani semua operasi terkait mobil (CRUD + NHTSA data)
+//
+// Fungsi CreateMobil:
+// - Ambil user_id dari context (owner mobil)
+// - Validasi input (merk, model, tahun, harga_jual harus valid)
+// - Bulatkan harga untuk menghindari floating-point precision issue
+// - Insert mobil baru ke database dengan status 'tersedia'
+// - Buat notifikasi untuk penjual (goroutine background)
+// - Return data mobil yang baru dibuat
+//
+// Fungsi ListMobil:
+// - Query daftar mobil dengan paginasi (default 50 mobil per page)
+// - Filter berdasarkan status (default: 'tersedia')
+// - Support limit dan offset untuk pagination
+// - Order by created_at DESC (mobil terbaru di atas)
+// - Handle harga_rental NULL dengan sql.NullFloat64
+// - Return list mobil + total count
+//
+// Fungsi GetMobil:
+// - Query detail satu mobil berdasarkan mobil_id
+// - Return 404 NotFound jika mobil tidak ada
+// - Support untuk public access (tidak perlu login)
+//
+// Fungsi GetMakes:
+// - Coba ambil list merek dari cache DB
+// - Jika cache kosong/expired -> fetch dari NHTSA API
+// - Simpan ke cache di background (goroutine)
+// - Return list merek mobil
+//
+// Fungsi GetModelsForMake:
+// - Coba ambil list model untuk brand_id dari cache
+// - Jika cache kosong -> fetch dari NHTSA API
+// - Simpan ke cache di background
+// - Return list model untuk merek tertentu
+//
+// Helper Functions:
+// - getMakesFromCache: Query brand_cache, cek TTL 24 jam
+// - saveMakesToCache: UPSERT ke brand_cache dengan transaction
+// - getModelsFromCache: Query model_cache untuk brand_id
+// - saveModelsToCache: UPSERT ke model_cache
+//
+// Database Tables:
+// - mobils: Data mobil user
+// - brand_cache: Cache merek dari NHTSA
+// - model_cache: Cache model dari NHTSA
+
+// PENJELASAN FILE mobil_service.go:
+// File ini menangani semua operasi terkait mobil (CRUD + NHTSA data)
+//
+// Fungsi CreateMobil:
+// - Ambil user_id dari context (owner mobil)
+// - Validasi input (merk, model, tahun, harga_jual harus valid)
+// - Bulatkan harga untuk menghindari floating-point precision issue
+// - Insert mobil baru ke database dengan status 'tersedia'
+// - Buat notifikasi untuk penjual (goroutine background)
+// - Return data mobil yang baru dibuat
+//
+// Fungsi ListMobil:
+// - Query daftar mobil dengan paginasi (default 50 mobil per page)
+// - Filter berdasarkan status (default: 'tersedia')
+// - Support limit dan offset untuk pagination
+// - Order by created_at DESC (mobil terbaru di atas)
+// - Handle harga_rental NULL dengan sql.NullFloat64
+// - Return list mobil + total count
+//
+// Fungsi GetMobil:
+// - Query detail satu mobil berdasarkan mobil_id
+// - Return 404 NotFound jika mobil tidak ada
+// - Support untuk public access (tidak perlu login)
+//
+// Fungsi GetMakes:
+// - Coba ambil list merek dari cache DB
+// - Jika cache kosong/expired -> fetch dari NHTSA API
+// - Simpan ke cache di background (goroutine)
+// - Return list merek mobil
+//
+// Fungsi GetModelsForMake:
+// - Coba ambil list model untuk brand_id dari cache
+// - Jika cache kosong -> fetch dari NHTSA API
+// - Simpan ke cache di background
+// - Return list model untuk merek tertentu
+//
+// Helper Functions:
+// - getMakesFromCache: Query brand_cache, cek TTL 24 jam
+// - saveMakesToCache: UPSERT ke brand_cache dengan transaction
+// - getModelsFromCache: Query model_cache untuk brand_id
+// - saveModelsToCache: UPSERT ke model_cache
+//
+// Database Tables:
+// - mobils: Data mobil user
+// - brand_cache: Cache merek dari NHTSA
+// - model_cache: Cache model dari NHTSA
