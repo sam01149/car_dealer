@@ -84,6 +84,8 @@ service MobilService {
     rpc ListMobil(ListMobilRequest) returns (ListMobilResponse);
     // Fitur 3: Detail Mobil
     rpc GetMobil(GetMobilRequest) returns (Mobil);
+    // Upload foto mobil (unary untuk gRPC-Web compatibility)
+    rpc UploadFoto(UploadFotoRequest) returns (UploadFotoResponse);
 }
 
 // --- Pesan untuk MobilService ---
@@ -114,6 +116,18 @@ message ListMobilResponse {
 
 message GetMobilRequest {
     string mobil_id = 1;
+}
+
+// Upload foto (unary - untuk gRPC-Web)
+message UploadFotoRequest {
+    string filename = 1;      // nama file (misal: civic.jpg)
+    string content_type = 2;  // MIME type (misal: image/jpeg)
+    bytes file_data = 3;      // seluruh file dalam bytes
+}
+
+message UploadFotoResponse {
+    string url = 1;           // URL/path foto yang berhasil diupload
+    string message = 2;       // Pesan sukses
 }
 
 // Pesan untuk NHTSA Cache

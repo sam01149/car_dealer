@@ -784,6 +784,119 @@ func (x *GetMobilRequest) GetMobilId() string {
 	return ""
 }
 
+// Upload foto (unary - untuk gRPC-Web)
+type UploadFotoRequest struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Filename      string                 `protobuf:"bytes,1,opt,name=filename,proto3" json:"filename,omitempty"`                          // nama file (misal: civic.jpg)
+	ContentType   string                 `protobuf:"bytes,2,opt,name=content_type,json=contentType,proto3" json:"content_type,omitempty"` // MIME type (misal: image/jpeg)
+	FileData      []byte                 `protobuf:"bytes,3,opt,name=file_data,json=fileData,proto3" json:"file_data,omitempty"`          // seluruh file dalam bytes
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UploadFotoRequest) Reset() {
+	*x = UploadFotoRequest{}
+	mi := &file_proto_carapp_proto_msgTypes[10]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UploadFotoRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UploadFotoRequest) ProtoMessage() {}
+
+func (x *UploadFotoRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_carapp_proto_msgTypes[10]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UploadFotoRequest.ProtoReflect.Descriptor instead.
+func (*UploadFotoRequest) Descriptor() ([]byte, []int) {
+	return file_proto_carapp_proto_rawDescGZIP(), []int{10}
+}
+
+func (x *UploadFotoRequest) GetFilename() string {
+	if x != nil {
+		return x.Filename
+	}
+	return ""
+}
+
+func (x *UploadFotoRequest) GetContentType() string {
+	if x != nil {
+		return x.ContentType
+	}
+	return ""
+}
+
+func (x *UploadFotoRequest) GetFileData() []byte {
+	if x != nil {
+		return x.FileData
+	}
+	return nil
+}
+
+type UploadFotoResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Url           string                 `protobuf:"bytes,1,opt,name=url,proto3" json:"url,omitempty"`         // URL/path foto yang berhasil diupload
+	Message       string                 `protobuf:"bytes,2,opt,name=message,proto3" json:"message,omitempty"` // Pesan sukses
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *UploadFotoResponse) Reset() {
+	*x = UploadFotoResponse{}
+	mi := &file_proto_carapp_proto_msgTypes[11]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *UploadFotoResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*UploadFotoResponse) ProtoMessage() {}
+
+func (x *UploadFotoResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_proto_carapp_proto_msgTypes[11]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use UploadFotoResponse.ProtoReflect.Descriptor instead.
+func (*UploadFotoResponse) Descriptor() ([]byte, []int) {
+	return file_proto_carapp_proto_rawDescGZIP(), []int{11}
+}
+
+func (x *UploadFotoResponse) GetUrl() string {
+	if x != nil {
+		return x.Url
+	}
+	return ""
+}
+
+func (x *UploadFotoResponse) GetMessage() string {
+	if x != nil {
+		return x.Message
+	}
+	return ""
+}
+
 // Pesan untuk NHTSA Cache
 type Make struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
@@ -795,7 +908,7 @@ type Make struct {
 
 func (x *Make) Reset() {
 	*x = Make{}
-	mi := &file_proto_carapp_proto_msgTypes[10]
+	mi := &file_proto_carapp_proto_msgTypes[12]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -807,7 +920,7 @@ func (x *Make) String() string {
 func (*Make) ProtoMessage() {}
 
 func (x *Make) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_carapp_proto_msgTypes[10]
+	mi := &file_proto_carapp_proto_msgTypes[12]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -820,7 +933,7 @@ func (x *Make) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Make.ProtoReflect.Descriptor instead.
 func (*Make) Descriptor() ([]byte, []int) {
-	return file_proto_carapp_proto_rawDescGZIP(), []int{10}
+	return file_proto_carapp_proto_rawDescGZIP(), []int{12}
 }
 
 func (x *Make) GetBrandId() string {
@@ -848,7 +961,7 @@ type Model struct {
 
 func (x *Model) Reset() {
 	*x = Model{}
-	mi := &file_proto_carapp_proto_msgTypes[11]
+	mi := &file_proto_carapp_proto_msgTypes[13]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -860,7 +973,7 @@ func (x *Model) String() string {
 func (*Model) ProtoMessage() {}
 
 func (x *Model) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_carapp_proto_msgTypes[11]
+	mi := &file_proto_carapp_proto_msgTypes[13]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -873,7 +986,7 @@ func (x *Model) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use Model.ProtoReflect.Descriptor instead.
 func (*Model) Descriptor() ([]byte, []int) {
-	return file_proto_carapp_proto_rawDescGZIP(), []int{11}
+	return file_proto_carapp_proto_rawDescGZIP(), []int{13}
 }
 
 func (x *Model) GetModelId() string {
@@ -905,7 +1018,7 @@ type GetMakesRequest struct {
 
 func (x *GetMakesRequest) Reset() {
 	*x = GetMakesRequest{}
-	mi := &file_proto_carapp_proto_msgTypes[12]
+	mi := &file_proto_carapp_proto_msgTypes[14]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -917,7 +1030,7 @@ func (x *GetMakesRequest) String() string {
 func (*GetMakesRequest) ProtoMessage() {}
 
 func (x *GetMakesRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_carapp_proto_msgTypes[12]
+	mi := &file_proto_carapp_proto_msgTypes[14]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -930,7 +1043,7 @@ func (x *GetMakesRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMakesRequest.ProtoReflect.Descriptor instead.
 func (*GetMakesRequest) Descriptor() ([]byte, []int) {
-	return file_proto_carapp_proto_rawDescGZIP(), []int{12}
+	return file_proto_carapp_proto_rawDescGZIP(), []int{14}
 }
 
 type GetMakesResponse struct {
@@ -942,7 +1055,7 @@ type GetMakesResponse struct {
 
 func (x *GetMakesResponse) Reset() {
 	*x = GetMakesResponse{}
-	mi := &file_proto_carapp_proto_msgTypes[13]
+	mi := &file_proto_carapp_proto_msgTypes[15]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -954,7 +1067,7 @@ func (x *GetMakesResponse) String() string {
 func (*GetMakesResponse) ProtoMessage() {}
 
 func (x *GetMakesResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_carapp_proto_msgTypes[13]
+	mi := &file_proto_carapp_proto_msgTypes[15]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -967,7 +1080,7 @@ func (x *GetMakesResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetMakesResponse.ProtoReflect.Descriptor instead.
 func (*GetMakesResponse) Descriptor() ([]byte, []int) {
-	return file_proto_carapp_proto_rawDescGZIP(), []int{13}
+	return file_proto_carapp_proto_rawDescGZIP(), []int{15}
 }
 
 func (x *GetMakesResponse) GetMakes() []*Make {
@@ -986,7 +1099,7 @@ type GetModelsForMakeRequest struct {
 
 func (x *GetModelsForMakeRequest) Reset() {
 	*x = GetModelsForMakeRequest{}
-	mi := &file_proto_carapp_proto_msgTypes[14]
+	mi := &file_proto_carapp_proto_msgTypes[16]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -998,7 +1111,7 @@ func (x *GetModelsForMakeRequest) String() string {
 func (*GetModelsForMakeRequest) ProtoMessage() {}
 
 func (x *GetModelsForMakeRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_carapp_proto_msgTypes[14]
+	mi := &file_proto_carapp_proto_msgTypes[16]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1011,7 +1124,7 @@ func (x *GetModelsForMakeRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetModelsForMakeRequest.ProtoReflect.Descriptor instead.
 func (*GetModelsForMakeRequest) Descriptor() ([]byte, []int) {
-	return file_proto_carapp_proto_rawDescGZIP(), []int{14}
+	return file_proto_carapp_proto_rawDescGZIP(), []int{16}
 }
 
 func (x *GetModelsForMakeRequest) GetBrandId() string {
@@ -1030,7 +1143,7 @@ type GetModelsForMakeResponse struct {
 
 func (x *GetModelsForMakeResponse) Reset() {
 	*x = GetModelsForMakeResponse{}
-	mi := &file_proto_carapp_proto_msgTypes[15]
+	mi := &file_proto_carapp_proto_msgTypes[17]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1042,7 +1155,7 @@ func (x *GetModelsForMakeResponse) String() string {
 func (*GetModelsForMakeResponse) ProtoMessage() {}
 
 func (x *GetModelsForMakeResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_carapp_proto_msgTypes[15]
+	mi := &file_proto_carapp_proto_msgTypes[17]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1055,7 +1168,7 @@ func (x *GetModelsForMakeResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetModelsForMakeResponse.ProtoReflect.Descriptor instead.
 func (*GetModelsForMakeResponse) Descriptor() ([]byte, []int) {
-	return file_proto_carapp_proto_rawDescGZIP(), []int{15}
+	return file_proto_carapp_proto_rawDescGZIP(), []int{17}
 }
 
 func (x *GetModelsForMakeResponse) GetModels() []*Model {
@@ -1074,7 +1187,7 @@ type BuyMobilRequest struct {
 
 func (x *BuyMobilRequest) Reset() {
 	*x = BuyMobilRequest{}
-	mi := &file_proto_carapp_proto_msgTypes[16]
+	mi := &file_proto_carapp_proto_msgTypes[18]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1086,7 +1199,7 @@ func (x *BuyMobilRequest) String() string {
 func (*BuyMobilRequest) ProtoMessage() {}
 
 func (x *BuyMobilRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_carapp_proto_msgTypes[16]
+	mi := &file_proto_carapp_proto_msgTypes[18]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1099,7 +1212,7 @@ func (x *BuyMobilRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use BuyMobilRequest.ProtoReflect.Descriptor instead.
 func (*BuyMobilRequest) Descriptor() ([]byte, []int) {
-	return file_proto_carapp_proto_rawDescGZIP(), []int{16}
+	return file_proto_carapp_proto_rawDescGZIP(), []int{18}
 }
 
 func (x *BuyMobilRequest) GetMobilId() string {
@@ -1123,7 +1236,7 @@ type TransaksiJualResponse struct {
 
 func (x *TransaksiJualResponse) Reset() {
 	*x = TransaksiJualResponse{}
-	mi := &file_proto_carapp_proto_msgTypes[17]
+	mi := &file_proto_carapp_proto_msgTypes[19]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1135,7 +1248,7 @@ func (x *TransaksiJualResponse) String() string {
 func (*TransaksiJualResponse) ProtoMessage() {}
 
 func (x *TransaksiJualResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_carapp_proto_msgTypes[17]
+	mi := &file_proto_carapp_proto_msgTypes[19]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1148,7 +1261,7 @@ func (x *TransaksiJualResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransaksiJualResponse.ProtoReflect.Descriptor instead.
 func (*TransaksiJualResponse) Descriptor() ([]byte, []int) {
-	return file_proto_carapp_proto_rawDescGZIP(), []int{17}
+	return file_proto_carapp_proto_rawDescGZIP(), []int{19}
 }
 
 func (x *TransaksiJualResponse) GetId() string {
@@ -1204,7 +1317,7 @@ type RentMobilRequest struct {
 
 func (x *RentMobilRequest) Reset() {
 	*x = RentMobilRequest{}
-	mi := &file_proto_carapp_proto_msgTypes[18]
+	mi := &file_proto_carapp_proto_msgTypes[20]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1216,7 +1329,7 @@ func (x *RentMobilRequest) String() string {
 func (*RentMobilRequest) ProtoMessage() {}
 
 func (x *RentMobilRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_carapp_proto_msgTypes[18]
+	mi := &file_proto_carapp_proto_msgTypes[20]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1229,7 +1342,7 @@ func (x *RentMobilRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use RentMobilRequest.ProtoReflect.Descriptor instead.
 func (*RentMobilRequest) Descriptor() ([]byte, []int) {
-	return file_proto_carapp_proto_rawDescGZIP(), []int{18}
+	return file_proto_carapp_proto_rawDescGZIP(), []int{20}
 }
 
 func (x *RentMobilRequest) GetMobilId() string {
@@ -1262,7 +1375,7 @@ type CompleteRentalRequest struct {
 
 func (x *CompleteRentalRequest) Reset() {
 	*x = CompleteRentalRequest{}
-	mi := &file_proto_carapp_proto_msgTypes[19]
+	mi := &file_proto_carapp_proto_msgTypes[21]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1274,7 +1387,7 @@ func (x *CompleteRentalRequest) String() string {
 func (*CompleteRentalRequest) ProtoMessage() {}
 
 func (x *CompleteRentalRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_carapp_proto_msgTypes[19]
+	mi := &file_proto_carapp_proto_msgTypes[21]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1287,7 +1400,7 @@ func (x *CompleteRentalRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use CompleteRentalRequest.ProtoReflect.Descriptor instead.
 func (*CompleteRentalRequest) Descriptor() ([]byte, []int) {
-	return file_proto_carapp_proto_rawDescGZIP(), []int{19}
+	return file_proto_carapp_proto_rawDescGZIP(), []int{21}
 }
 
 func (x *CompleteRentalRequest) GetRentalId() string {
@@ -1314,7 +1427,7 @@ type TransaksiRentalResponse struct {
 
 func (x *TransaksiRentalResponse) Reset() {
 	*x = TransaksiRentalResponse{}
-	mi := &file_proto_carapp_proto_msgTypes[20]
+	mi := &file_proto_carapp_proto_msgTypes[22]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1326,7 +1439,7 @@ func (x *TransaksiRentalResponse) String() string {
 func (*TransaksiRentalResponse) ProtoMessage() {}
 
 func (x *TransaksiRentalResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_carapp_proto_msgTypes[20]
+	mi := &file_proto_carapp_proto_msgTypes[22]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1339,7 +1452,7 @@ func (x *TransaksiRentalResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use TransaksiRentalResponse.ProtoReflect.Descriptor instead.
 func (*TransaksiRentalResponse) Descriptor() ([]byte, []int) {
-	return file_proto_carapp_proto_rawDescGZIP(), []int{20}
+	return file_proto_carapp_proto_rawDescGZIP(), []int{22}
 }
 
 func (x *TransaksiRentalResponse) GetId() string {
@@ -1413,7 +1526,7 @@ type GetNotificationsRequest struct {
 
 func (x *GetNotificationsRequest) Reset() {
 	*x = GetNotificationsRequest{}
-	mi := &file_proto_carapp_proto_msgTypes[21]
+	mi := &file_proto_carapp_proto_msgTypes[23]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1425,7 +1538,7 @@ func (x *GetNotificationsRequest) String() string {
 func (*GetNotificationsRequest) ProtoMessage() {}
 
 func (x *GetNotificationsRequest) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_carapp_proto_msgTypes[21]
+	mi := &file_proto_carapp_proto_msgTypes[23]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1438,7 +1551,7 @@ func (x *GetNotificationsRequest) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use GetNotificationsRequest.ProtoReflect.Descriptor instead.
 func (*GetNotificationsRequest) Descriptor() ([]byte, []int) {
-	return file_proto_carapp_proto_rawDescGZIP(), []int{21}
+	return file_proto_carapp_proto_rawDescGZIP(), []int{23}
 }
 
 type DashboardSummary struct {
@@ -1453,7 +1566,7 @@ type DashboardSummary struct {
 
 func (x *DashboardSummary) Reset() {
 	*x = DashboardSummary{}
-	mi := &file_proto_carapp_proto_msgTypes[22]
+	mi := &file_proto_carapp_proto_msgTypes[24]
 	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 	ms.StoreMessageInfo(mi)
 }
@@ -1465,7 +1578,7 @@ func (x *DashboardSummary) String() string {
 func (*DashboardSummary) ProtoMessage() {}
 
 func (x *DashboardSummary) ProtoReflect() protoreflect.Message {
-	mi := &file_proto_carapp_proto_msgTypes[22]
+	mi := &file_proto_carapp_proto_msgTypes[24]
 	if x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -1478,7 +1591,7 @@ func (x *DashboardSummary) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use DashboardSummary.ProtoReflect.Descriptor instead.
 func (*DashboardSummary) Descriptor() ([]byte, []int) {
-	return file_proto_carapp_proto_rawDescGZIP(), []int{22}
+	return file_proto_carapp_proto_rawDescGZIP(), []int{24}
 }
 
 func (x *DashboardSummary) GetTotalMobilAnda() int32 {
@@ -1582,7 +1695,14 @@ const file_proto_carapp_proto_rawDesc = "" +
 	"\x06mobils\x18\x01 \x03(\v2\r.carapp.MobilR\x06mobils\x12\x14\n" +
 	"\x05total\x18\x02 \x01(\x05R\x05total\",\n" +
 	"\x0fGetMobilRequest\x12\x19\n" +
-	"\bmobil_id\x18\x01 \x01(\tR\amobilId\"5\n" +
+	"\bmobil_id\x18\x01 \x01(\tR\amobilId\"o\n" +
+	"\x11UploadFotoRequest\x12\x1a\n" +
+	"\bfilename\x18\x01 \x01(\tR\bfilename\x12!\n" +
+	"\fcontent_type\x18\x02 \x01(\tR\vcontentType\x12\x1b\n" +
+	"\tfile_data\x18\x03 \x01(\fR\bfileData\"@\n" +
+	"\x12UploadFotoResponse\x12\x10\n" +
+	"\x03url\x18\x01 \x01(\tR\x03url\x12\x18\n" +
+	"\amessage\x18\x02 \x01(\tR\amessage\"5\n" +
 	"\x04Make\x12\x19\n" +
 	"\bbrand_id\x18\x01 \x01(\tR\abrandId\x12\x12\n" +
 	"\x04name\x18\x02 \x01(\tR\x04name\"Q\n" +
@@ -1634,11 +1754,13 @@ const file_proto_carapp_proto_rawDesc = "" +
 	"\x0fnotifikasi_baru\x18\x04 \x01(\x05R\x0enotifikasiBaru2}\n" +
 	"\vAuthService\x129\n" +
 	"\bRegister\x12\x17.carapp.RegisterRequest\x1a\x14.carapp.AuthResponse\x123\n" +
-	"\x05Login\x12\x14.carapp.LoginRequest\x1a\x14.carapp.AuthResponse2\xbe\x01\n" +
+	"\x05Login\x12\x14.carapp.LoginRequest\x1a\x14.carapp.AuthResponse2\x83\x02\n" +
 	"\fMobilService\x128\n" +
 	"\vCreateMobil\x12\x1a.carapp.CreateMobilRequest\x1a\r.carapp.Mobil\x12@\n" +
 	"\tListMobil\x12\x18.carapp.ListMobilRequest\x1a\x19.carapp.ListMobilResponse\x122\n" +
-	"\bGetMobil\x12\x17.carapp.GetMobilRequest\x1a\r.carapp.Mobil2\xa8\x01\n" +
+	"\bGetMobil\x12\x17.carapp.GetMobilRequest\x1a\r.carapp.Mobil\x12C\n" +
+	"\n" +
+	"UploadFoto\x12\x19.carapp.UploadFotoRequest\x1a\x1a.carapp.UploadFotoResponse2\xa8\x01\n" +
 	"\x10NhtsaDataService\x12=\n" +
 	"\bGetMakes\x12\x17.carapp.GetMakesRequest\x1a\x18.carapp.GetMakesResponse\x12U\n" +
 	"\x10GetModelsForMake\x12\x1f.carapp.GetModelsForMakeRequest\x1a .carapp.GetModelsForMakeResponse2\xf0\x01\n" +
@@ -1663,7 +1785,7 @@ func file_proto_carapp_proto_rawDescGZIP() []byte {
 	return file_proto_carapp_proto_rawDescData
 }
 
-var file_proto_carapp_proto_msgTypes = make([]protoimpl.MessageInfo, 23)
+var file_proto_carapp_proto_msgTypes = make([]protoimpl.MessageInfo, 25)
 var file_proto_carapp_proto_goTypes = []any{
 	(*User)(nil),                     // 0: carapp.User
 	(*Mobil)(nil),                    // 1: carapp.Mobil
@@ -1675,57 +1797,61 @@ var file_proto_carapp_proto_goTypes = []any{
 	(*ListMobilRequest)(nil),         // 7: carapp.ListMobilRequest
 	(*ListMobilResponse)(nil),        // 8: carapp.ListMobilResponse
 	(*GetMobilRequest)(nil),          // 9: carapp.GetMobilRequest
-	(*Make)(nil),                     // 10: carapp.Make
-	(*Model)(nil),                    // 11: carapp.Model
-	(*GetMakesRequest)(nil),          // 12: carapp.GetMakesRequest
-	(*GetMakesResponse)(nil),         // 13: carapp.GetMakesResponse
-	(*GetModelsForMakeRequest)(nil),  // 14: carapp.GetModelsForMakeRequest
-	(*GetModelsForMakeResponse)(nil), // 15: carapp.GetModelsForMakeResponse
-	(*BuyMobilRequest)(nil),          // 16: carapp.BuyMobilRequest
-	(*TransaksiJualResponse)(nil),    // 17: carapp.TransaksiJualResponse
-	(*RentMobilRequest)(nil),         // 18: carapp.RentMobilRequest
-	(*CompleteRentalRequest)(nil),    // 19: carapp.CompleteRentalRequest
-	(*TransaksiRentalResponse)(nil),  // 20: carapp.TransaksiRentalResponse
-	(*GetNotificationsRequest)(nil),  // 21: carapp.GetNotificationsRequest
-	(*DashboardSummary)(nil),         // 22: carapp.DashboardSummary
-	(*timestamppb.Timestamp)(nil),    // 23: google.protobuf.Timestamp
-	(*emptypb.Empty)(nil),            // 24: google.protobuf.Empty
+	(*UploadFotoRequest)(nil),        // 10: carapp.UploadFotoRequest
+	(*UploadFotoResponse)(nil),       // 11: carapp.UploadFotoResponse
+	(*Make)(nil),                     // 12: carapp.Make
+	(*Model)(nil),                    // 13: carapp.Model
+	(*GetMakesRequest)(nil),          // 14: carapp.GetMakesRequest
+	(*GetMakesResponse)(nil),         // 15: carapp.GetMakesResponse
+	(*GetModelsForMakeRequest)(nil),  // 16: carapp.GetModelsForMakeRequest
+	(*GetModelsForMakeResponse)(nil), // 17: carapp.GetModelsForMakeResponse
+	(*BuyMobilRequest)(nil),          // 18: carapp.BuyMobilRequest
+	(*TransaksiJualResponse)(nil),    // 19: carapp.TransaksiJualResponse
+	(*RentMobilRequest)(nil),         // 20: carapp.RentMobilRequest
+	(*CompleteRentalRequest)(nil),    // 21: carapp.CompleteRentalRequest
+	(*TransaksiRentalResponse)(nil),  // 22: carapp.TransaksiRentalResponse
+	(*GetNotificationsRequest)(nil),  // 23: carapp.GetNotificationsRequest
+	(*DashboardSummary)(nil),         // 24: carapp.DashboardSummary
+	(*timestamppb.Timestamp)(nil),    // 25: google.protobuf.Timestamp
+	(*emptypb.Empty)(nil),            // 26: google.protobuf.Empty
 }
 var file_proto_carapp_proto_depIdxs = []int32{
-	23, // 0: carapp.User.created_at:type_name -> google.protobuf.Timestamp
-	23, // 1: carapp.Mobil.created_at:type_name -> google.protobuf.Timestamp
-	23, // 2: carapp.Notifikasi.read_at:type_name -> google.protobuf.Timestamp
-	23, // 3: carapp.Notifikasi.created_at:type_name -> google.protobuf.Timestamp
+	25, // 0: carapp.User.created_at:type_name -> google.protobuf.Timestamp
+	25, // 1: carapp.Mobil.created_at:type_name -> google.protobuf.Timestamp
+	25, // 2: carapp.Notifikasi.read_at:type_name -> google.protobuf.Timestamp
+	25, // 3: carapp.Notifikasi.created_at:type_name -> google.protobuf.Timestamp
 	0,  // 4: carapp.AuthResponse.user:type_name -> carapp.User
 	1,  // 5: carapp.ListMobilResponse.mobils:type_name -> carapp.Mobil
-	10, // 6: carapp.GetMakesResponse.makes:type_name -> carapp.Make
-	11, // 7: carapp.GetModelsForMakeResponse.models:type_name -> carapp.Model
+	12, // 6: carapp.GetMakesResponse.makes:type_name -> carapp.Make
+	13, // 7: carapp.GetModelsForMakeResponse.models:type_name -> carapp.Model
 	3,  // 8: carapp.AuthService.Register:input_type -> carapp.RegisterRequest
 	4,  // 9: carapp.AuthService.Login:input_type -> carapp.LoginRequest
 	6,  // 10: carapp.MobilService.CreateMobil:input_type -> carapp.CreateMobilRequest
 	7,  // 11: carapp.MobilService.ListMobil:input_type -> carapp.ListMobilRequest
 	9,  // 12: carapp.MobilService.GetMobil:input_type -> carapp.GetMobilRequest
-	12, // 13: carapp.NhtsaDataService.GetMakes:input_type -> carapp.GetMakesRequest
-	14, // 14: carapp.NhtsaDataService.GetModelsForMake:input_type -> carapp.GetModelsForMakeRequest
-	16, // 15: carapp.TransaksiService.BuyMobil:input_type -> carapp.BuyMobilRequest
-	18, // 16: carapp.TransaksiService.RentMobil:input_type -> carapp.RentMobilRequest
-	19, // 17: carapp.TransaksiService.CompleteRental:input_type -> carapp.CompleteRentalRequest
-	21, // 18: carapp.NotifikasiService.GetNotifications:input_type -> carapp.GetNotificationsRequest
-	24, // 19: carapp.DashboardService.GetDashboard:input_type -> google.protobuf.Empty
-	5,  // 20: carapp.AuthService.Register:output_type -> carapp.AuthResponse
-	5,  // 21: carapp.AuthService.Login:output_type -> carapp.AuthResponse
-	1,  // 22: carapp.MobilService.CreateMobil:output_type -> carapp.Mobil
-	8,  // 23: carapp.MobilService.ListMobil:output_type -> carapp.ListMobilResponse
-	1,  // 24: carapp.MobilService.GetMobil:output_type -> carapp.Mobil
-	13, // 25: carapp.NhtsaDataService.GetMakes:output_type -> carapp.GetMakesResponse
-	15, // 26: carapp.NhtsaDataService.GetModelsForMake:output_type -> carapp.GetModelsForMakeResponse
-	17, // 27: carapp.TransaksiService.BuyMobil:output_type -> carapp.TransaksiJualResponse
-	20, // 28: carapp.TransaksiService.RentMobil:output_type -> carapp.TransaksiRentalResponse
-	20, // 29: carapp.TransaksiService.CompleteRental:output_type -> carapp.TransaksiRentalResponse
-	2,  // 30: carapp.NotifikasiService.GetNotifications:output_type -> carapp.Notifikasi
-	22, // 31: carapp.DashboardService.GetDashboard:output_type -> carapp.DashboardSummary
-	20, // [20:32] is the sub-list for method output_type
-	8,  // [8:20] is the sub-list for method input_type
+	10, // 13: carapp.MobilService.UploadFoto:input_type -> carapp.UploadFotoRequest
+	14, // 14: carapp.NhtsaDataService.GetMakes:input_type -> carapp.GetMakesRequest
+	16, // 15: carapp.NhtsaDataService.GetModelsForMake:input_type -> carapp.GetModelsForMakeRequest
+	18, // 16: carapp.TransaksiService.BuyMobil:input_type -> carapp.BuyMobilRequest
+	20, // 17: carapp.TransaksiService.RentMobil:input_type -> carapp.RentMobilRequest
+	21, // 18: carapp.TransaksiService.CompleteRental:input_type -> carapp.CompleteRentalRequest
+	23, // 19: carapp.NotifikasiService.GetNotifications:input_type -> carapp.GetNotificationsRequest
+	26, // 20: carapp.DashboardService.GetDashboard:input_type -> google.protobuf.Empty
+	5,  // 21: carapp.AuthService.Register:output_type -> carapp.AuthResponse
+	5,  // 22: carapp.AuthService.Login:output_type -> carapp.AuthResponse
+	1,  // 23: carapp.MobilService.CreateMobil:output_type -> carapp.Mobil
+	8,  // 24: carapp.MobilService.ListMobil:output_type -> carapp.ListMobilResponse
+	1,  // 25: carapp.MobilService.GetMobil:output_type -> carapp.Mobil
+	11, // 26: carapp.MobilService.UploadFoto:output_type -> carapp.UploadFotoResponse
+	15, // 27: carapp.NhtsaDataService.GetMakes:output_type -> carapp.GetMakesResponse
+	17, // 28: carapp.NhtsaDataService.GetModelsForMake:output_type -> carapp.GetModelsForMakeResponse
+	19, // 29: carapp.TransaksiService.BuyMobil:output_type -> carapp.TransaksiJualResponse
+	22, // 30: carapp.TransaksiService.RentMobil:output_type -> carapp.TransaksiRentalResponse
+	22, // 31: carapp.TransaksiService.CompleteRental:output_type -> carapp.TransaksiRentalResponse
+	2,  // 32: carapp.NotifikasiService.GetNotifications:output_type -> carapp.Notifikasi
+	24, // 33: carapp.DashboardService.GetDashboard:output_type -> carapp.DashboardSummary
+	21, // [21:34] is the sub-list for method output_type
+	8,  // [8:21] is the sub-list for method input_type
 	8,  // [8:8] is the sub-list for extension type_name
 	8,  // [8:8] is the sub-list for extension extendee
 	0,  // [0:8] is the sub-list for field type_name
@@ -1743,7 +1869,7 @@ func file_proto_carapp_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_proto_carapp_proto_rawDesc), len(file_proto_carapp_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   23,
+			NumMessages:   25,
 			NumExtensions: 0,
 			NumServices:   6,
 		},

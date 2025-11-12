@@ -163,6 +163,7 @@ const (
 	MobilService_CreateMobil_FullMethodName = "/carapp.MobilService/CreateMobil"
 	MobilService_ListMobil_FullMethodName   = "/carapp.MobilService/ListMobil"
 	MobilService_GetMobil_FullMethodName    = "/carapp.MobilService/GetMobil"
+	MobilService_UploadFoto_FullMethodName  = "/carapp.MobilService/UploadFoto"
 )
 
 // MobilServiceClient is the client API for MobilService service.
@@ -175,6 +176,8 @@ type MobilServiceClient interface {
 	ListMobil(ctx context.Context, in *ListMobilRequest, opts ...grpc.CallOption) (*ListMobilResponse, error)
 	// Fitur 3: Detail Mobil
 	GetMobil(ctx context.Context, in *GetMobilRequest, opts ...grpc.CallOption) (*Mobil, error)
+	// Upload foto mobil (unary untuk gRPC-Web compatibility)
+	UploadFoto(ctx context.Context, in *UploadFotoRequest, opts ...grpc.CallOption) (*UploadFotoResponse, error)
 }
 
 type mobilServiceClient struct {
@@ -215,6 +218,16 @@ func (c *mobilServiceClient) GetMobil(ctx context.Context, in *GetMobilRequest, 
 	return out, nil
 }
 
+func (c *mobilServiceClient) UploadFoto(ctx context.Context, in *UploadFotoRequest, opts ...grpc.CallOption) (*UploadFotoResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(UploadFotoResponse)
+	err := c.cc.Invoke(ctx, MobilService_UploadFoto_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MobilServiceServer is the server API for MobilService service.
 // All implementations must embed UnimplementedMobilServiceServer
 // for forward compatibility.
@@ -225,6 +238,8 @@ type MobilServiceServer interface {
 	ListMobil(context.Context, *ListMobilRequest) (*ListMobilResponse, error)
 	// Fitur 3: Detail Mobil
 	GetMobil(context.Context, *GetMobilRequest) (*Mobil, error)
+	// Upload foto mobil (unary untuk gRPC-Web compatibility)
+	UploadFoto(context.Context, *UploadFotoRequest) (*UploadFotoResponse, error)
 	mustEmbedUnimplementedMobilServiceServer()
 }
 
@@ -243,6 +258,9 @@ func (UnimplementedMobilServiceServer) ListMobil(context.Context, *ListMobilRequ
 }
 func (UnimplementedMobilServiceServer) GetMobil(context.Context, *GetMobilRequest) (*Mobil, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMobil not implemented")
+}
+func (UnimplementedMobilServiceServer) UploadFoto(context.Context, *UploadFotoRequest) (*UploadFotoResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method UploadFoto not implemented")
 }
 func (UnimplementedMobilServiceServer) mustEmbedUnimplementedMobilServiceServer() {}
 func (UnimplementedMobilServiceServer) testEmbeddedByValue()                      {}
@@ -319,6 +337,24 @@ func _MobilService_GetMobil_Handler(srv interface{}, ctx context.Context, dec fu
 	return interceptor(ctx, in, info, handler)
 }
 
+func _MobilService_UploadFoto_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(UploadFotoRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MobilServiceServer).UploadFoto(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: MobilService_UploadFoto_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MobilServiceServer).UploadFoto(ctx, req.(*UploadFotoRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // MobilService_ServiceDesc is the grpc.ServiceDesc for MobilService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -337,6 +373,10 @@ var MobilService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetMobil",
 			Handler:    _MobilService_GetMobil_Handler,
+		},
+		{
+			MethodName: "UploadFoto",
+			Handler:    _MobilService_UploadFoto_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -9,11 +9,22 @@ import (
 )
 
 const (
-	nhtsaBaseURL = "https://vpic.nhtsa.dot.gov/api/vehicles"
+	nhtsaBaseURL   = "https://vpic.nhtsa.dot.gov/api/vehicles"
+	maxRetries     = 3
+	initialTimeout = 30 * time.Second
 )
 
-// HttpClient untuk dependensi
-var httpClient = &http.Client{Timeout: 10 * time.Second}
+// HttpClient dengan timeout lebih panjang
+var httpClient = &http.Client{
+	Timeout: initialTimeout,
+	Transport: &http.Transport{
+		MaxIdleConns:        10,
+		IdleConnTimeout:     30 * time.Second,
+		DisableCompression:  false,
+		DisableKeepAlives:   false,
+		MaxIdleConnsPerHost: 10,
+	},
+}
 
 // Struct untuk parsing JSON response 'Get All Makes'
 type NhtsaMake struct {
@@ -63,32 +74,65 @@ func FetchAllMakes() ([]NhtsaMake, error) {
 	return apiResponse.Results, nil
 }
 
-// FetchModelsForMakeID mengambil model untuk merek tertentu dari NHTSA
+// FetchModelsForMakeID mengambil model untuk merek tertentu dari NHTSA dengan retry logic
 func FetchModelsForMakeID(makeID string) ([]NhtsaModel, error) {
 	url := fmt.Sprintf("%s/GetModelsForMakeId/%s?format=json", nhtsaBaseURL, makeID)
 
-	req, err := http.NewRequest("GET", url, nil)
-	if err != nil {
-		return nil, err
+	var lastErr error
+	for attempt := 1; attempt <= maxRetries; attempt++ {
+		log.Printf("Attempt %d/%d: Fetching models for MakeID %s...", attempt, maxRetries, makeID)
+
+		req, err := http.NewRequest("GET", url, nil)
+		if err != nil {
+			return nil, err
+		}
+
+		// Set headers untuk menghindari rate limiting
+		req.Header.Set("User-Agent", "CarApp/1.0")
+		req.Header.Set("Accept", "application/json")
+
+		resp, err := httpClient.Do(req)
+		if err != nil {
+			lastErr = err
+			log.Printf("Attempt %d failed: %v", attempt, err)
+
+			// Jangan retry jika ini attempt terakhir
+			if attempt < maxRetries {
+				// Exponential backoff: 2s, 4s, 8s
+				backoff := time.Duration(attempt*2) * time.Second
+				log.Printf("Retrying in %v...", backoff)
+				time.Sleep(backoff)
+				continue
+			}
+			break
+		}
+		defer resp.Body.Close()
+
+		if resp.StatusCode != http.StatusOK {
+			lastErr = fmt.Errorf("NHTSA API returned status: %s", resp.Status)
+			log.Printf("Attempt %d: HTTP error %s", attempt, resp.Status)
+
+			if attempt < maxRetries && resp.StatusCode >= 500 {
+				// Retry hanya untuk server error (5xx)
+				backoff := time.Duration(attempt*2) * time.Second
+				time.Sleep(backoff)
+				continue
+			}
+			break
+		}
+
+		var apiResponse NhtsaModelResponse
+		if err := json.NewDecoder(resp.Body).Decode(&apiResponse); err != nil {
+			lastErr = err
+			log.Printf("Attempt %d: JSON decode error: %v", attempt, err)
+			break
+		}
+
+		log.Printf("✓ Sukses mengambil %d model untuk MakeID %s dari NHTSA API", len(apiResponse.Results), makeID)
+		return apiResponse.Results, nil
 	}
 
-	resp, err := httpClient.Do(req)
-	if err != nil {
-		return nil, err
-	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		return nil, fmt.Errorf("NHTSA API returned status: %s", resp.Status)
-	}
-
-	var apiResponse NhtsaModelResponse
-	if err := json.NewDecoder(resp.Body).Decode(&apiResponse); err != nil {
-		return nil, err
-	}
-
-	log.Printf("Sukses mengambil %d model untuk MakeID %s dari NHTSA API", len(apiResponse.Results), makeID)
-	return apiResponse.Results, nil
+	return nil, fmt.Errorf("failed after %d attempts: %v", maxRetries, lastErr)
 }
 
 // PENJELASAN FILE nhtsa_client.go:

@@ -93,14 +93,12 @@ func filterPopularMakes(allMakes []nhtsa.NhtsaMake) []nhtsa.NhtsaMake {
 
 // GetModelsForMake (Logika ini DIPINDAHKAN dari mobil_service.go)
 func (s *NhtsaDataServiceServer) GetModelsForMake(ctx context.Context, req *pb.GetModelsForMakeRequest) (*pb.GetModelsForMakeResponse, error) {
-	// ... (Salin-tempel SEMUA kode fungsi GetModelsForMake dari internal/mobil/mobil_service.go ke sini) ...
-	// ... (Termasuk helper getModelsFromCache dan saveModelsToCache) ...
 	log.Println("NhtsaDataService: GetModelsForMake dipanggil")
 	if req.BrandId == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "BrandId tidak boleh kosong")
 	}
 
-	// 1. Coba ambil dari cache
+	// 1. Coba ambil dari cache fresh (< 24 jam)
 	models, err := s.getModelsFromCache(ctx, req.BrandId)
 	if err == nil {
 		log.Printf("GetModelsForMake: Data untuk %s disajikan dari cache DB", req.BrandId)
@@ -111,7 +109,18 @@ func (s *NhtsaDataServiceServer) GetModelsForMake(ctx context.Context, req *pb.G
 	log.Printf("GetModelsForMake: Cache untuk %s kosong, mengambil dari NHTSA API...", req.BrandId)
 	apiModels, err := nhtsa.FetchModelsForMakeID(req.BrandId)
 	if err != nil {
-		log.Printf("Gagal mengambil model dari NHTSA: %v", err)
+		// 2a. Jika API gagal, coba pakai cache lama (stale cache)
+		log.Printf("❌ Gagal mengambil model dari NHTSA: %v", err)
+		log.Printf("Mencoba cache lama (stale cache) untuk %s...", req.BrandId)
+
+		staleCacheModels, staleErr := s.getStaleModelsFromCache(ctx, req.BrandId)
+		if staleErr == nil && len(staleCacheModels) > 0 {
+			log.Printf("✓ Menggunakan stale cache untuk %s (%d models)", req.BrandId, len(staleCacheModels))
+			return &pb.GetModelsForMakeResponse{Models: staleCacheModels}, nil
+		}
+
+		// 2b. Jika stale cache juga tidak ada, return error
+		log.Printf("❌ Stale cache juga tidak tersedia untuk %s", req.BrandId)
 		return nil, status.Errorf(codes.Internal, "Gagal mengambil data model: %v", err)
 	}
 
@@ -189,6 +198,36 @@ func (s *NhtsaDataServiceServer) getModelsFromCache(ctx context.Context, brandID
 		SELECT model_id, brand_id, name
 		FROM nhtsa_models_cache
 		WHERE brand_id = $1 AND cached_at > NOW() - INTERVAL '24 hours'
+		ORDER BY name
+	`
+	rows, err := s.DB.QueryContext(ctx, query, brandID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var models []*pb.Model
+	for rows.Next() {
+		var m pb.Model
+		if err := rows.Scan(&m.ModelId, &m.BrandId, &m.Name); err != nil {
+			return nil, err
+		}
+		models = append(models, &m)
+	}
+
+	if len(models) == 0 {
+		return nil, sql.ErrNoRows
+	}
+
+	return models, nil
+}
+
+// Helper: Ambil models dari stale cache (cache lama > 24 jam, tapi tetap ada)
+func (s *NhtsaDataServiceServer) getStaleModelsFromCache(ctx context.Context, brandID string) ([]*pb.Model, error) {
+	query := `
+		SELECT model_id, brand_id, name
+		FROM nhtsa_models_cache
+		WHERE brand_id = $1
 		ORDER BY name
 	`
 	rows, err := s.DB.QueryContext(ctx, query, brandID)

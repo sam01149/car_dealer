@@ -7,6 +7,8 @@ import (
 	"fmt"
 	"log"
 	"math"
+	"os"
+	"path/filepath"
 	"strconv"
 	"time"
 
@@ -14,6 +16,7 @@ import (
 	"carapp.com/m/internal/nhtsa"
 	"carapp.com/m/internal/notifikasi"
 	pb "carapp.com/m/proto"
+	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 	"google.golang.org/protobuf/types/known/timestamppb"
@@ -80,6 +83,11 @@ func (s *MobilServiceServer) CreateMobil(ctx context.Context, req *pb.CreateMobi
 
 	if req.Deskripsi == "" {
 		return nil, status.Errorf(codes.InvalidArgument, "Deskripsi harus diisi")
+	}
+
+	// Validasi foto URL harus ada (user wajib upload foto dulu)
+	if req.FotoUrl == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "Foto mobil harus diupload terlebih dahulu")
 	}
 
 	// Bulatkan harga untuk menghindari floating-point precision issue
@@ -433,6 +441,64 @@ func (s *MobilServiceServer) saveModelsToCache(apiModels []nhtsa.NhtsaModel) {
 	}
 
 	log.Printf("Sukses menyimpan %d model ke cache DB", len(apiModels))
+}
+
+// UploadFoto menangani upload foto mobil dengan client streaming
+func (s *MobilServiceServer) UploadFoto(ctx context.Context, req *pb.UploadFotoRequest) (*pb.UploadFotoResponse, error) {
+	log.Println("MobilService: UploadFoto unary call dimulai")
+
+	// Validasi file
+	if req.Filename == "" {
+		return nil, status.Errorf(codes.InvalidArgument, "Filename tidak boleh kosong")
+	}
+
+	if len(req.FileData) == 0 {
+		return nil, status.Errorf(codes.InvalidArgument, "File data tidak boleh kosong")
+	}
+
+	// Validasi content type (hanya terima image)
+	allowedTypes := map[string]bool{
+		"image/jpeg": true,
+		"image/jpg":  true,
+		"image/png":  true,
+		"image/webp": true,
+	}
+	if !allowedTypes[req.ContentType] {
+		return nil, status.Errorf(codes.InvalidArgument, "Format file tidak didukung. Gunakan JPEG, PNG, atau WebP")
+	}
+
+	// Validasi ukuran file (max 5MB)
+	const maxFileSize = 5 * 1024 * 1024 // 5MB
+	if len(req.FileData) > maxFileSize {
+		return nil, status.Errorf(codes.InvalidArgument, "Ukuran file terlalu besar. Maksimal 5MB")
+	}
+
+	// Buat folder uploads jika belum ada
+	uploadDir := "uploads"
+	if err := os.MkdirAll(uploadDir, 0755); err != nil {
+		log.Printf("Gagal membuat direktori uploads: %v", err)
+		return nil, status.Errorf(codes.Internal, "Gagal menyiapkan folder upload")
+	}
+
+	// Generate nama file unik
+	ext := filepath.Ext(req.Filename)
+	newFilename := fmt.Sprintf("%s%s", uuid.New().String(), ext)
+	filePath := filepath.Join(uploadDir, newFilename)
+
+	// Tulis file
+	if err := os.WriteFile(filePath, req.FileData, 0644); err != nil {
+		log.Printf("Gagal menulis file: %v", err)
+		return nil, status.Errorf(codes.Internal, "Gagal menyimpan file")
+	}
+
+	log.Printf("✓ Upload selesai: %s (%d bytes)", newFilename, len(req.FileData))
+
+	// Return URL relatif
+	url := fmt.Sprintf("/uploads/%s", newFilename)
+	return &pb.UploadFotoResponse{
+		Url:     url,
+		Message: fmt.Sprintf("Foto berhasil diupload (%d KB)", len(req.FileData)/1024),
+	}, nil
 }
 
 // PENJELASAN FILE mobil_service.go:
