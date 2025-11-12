@@ -64,6 +64,9 @@ func main() {
 	)
 
 	// 6. Buat Handler HTTP dengan CORS
+	// File server untuk uploads
+	fileServer := http.FileServer(http.Dir("./uploads"))
+
 	corsHandler := cors.New(cors.Options{
 		AllowedOrigins:   []string{"http://localhost:3000", "http://localhost:3001", "http://10.0.7.129:3000", "http://127.0.0.1:3000", "http://172.18.208.1:3000"},
 		AllowedMethods:   []string{"POST", "GET", "OPTIONS", "PUT", "DELETE"},
@@ -73,6 +76,14 @@ func main() {
 		Debug:            true,
 	}).Handler(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Printf("Received request: %s %s from %s", r.Method, r.URL.Path, r.RemoteAddr)
+
+		// Serve static files dari /uploads/
+		if len(r.URL.Path) > 9 && r.URL.Path[:9] == "/uploads/" {
+			log.Printf("Serving static file: %s", r.URL.Path)
+			http.StripPrefix("/uploads/", fileServer).ServeHTTP(w, r)
+			return
+		}
+
 		if wrappedGrpc.IsAcceptableGrpcCorsRequest(r) || wrappedGrpc.IsGrpcWebRequest(r) {
 			wrappedGrpc.ServeHTTP(w, r)
 			return
